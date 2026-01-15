@@ -5,6 +5,11 @@ import { Label } from "@/components/ui/label";
 import { Check, User, Lock, ArrowRight, ArrowLeft, Cake } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
+import { api } from "@/lib/axios";
+import { toast } from "sonner";
+import type { AxiosError } from "axios";
+import type { ApiErrorResponse } from "@/features/auth/types/api.error";
+
 interface FormData {
   firstName: string;
   lastName: string;
@@ -15,6 +20,9 @@ interface FormData {
 }
 
 const Register = () => {
+  // Estados para manejo de axios
+  const  [loading, setLoading] = useState(false);
+
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<FormData>({
@@ -39,8 +47,8 @@ const Register = () => {
     if (!formData.firstName.trim()) newErrors.firstName = "Nombre requerido";
     if (!formData.lastName.trim()) newErrors.lastName = "Apellidos requeridos";
     if (!formData.phone.trim()) newErrors.phone = "Celular requerido";
-    else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ""))) {
-      newErrors.phone = "Ingresa un número válido de 10 dígitos";
+    else if (!/^\d{9}$/.test(formData.phone.replace(/\D/g, ""))) {
+      newErrors.phone = "Ingresa un número válido de 9 dígitos";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -69,12 +77,47 @@ const Register = () => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
+
     e.preventDefault();
-    if (validateStep2()) {
-      // Here we would normally send data to backend
+
+    if (! validateStep2() ) return;
+
+    try {
+      setLoading(true);
+
+      // se carga payload del formulario
+      const payload = {
+        email: formData.email,
+        password: formData.password,
+        name: formData.firstName,
+        lastName: formData.lastName,
+        phone: formData.phone,
+      };
+
+      // Ver data del Form
+      console.log("PAYLOAD REGISTER", payload);
+
+      await api.post("/auth/register", payload);
+
+      toast.success("Usuario registrado correctamente 🎉");
+
       navigate("/dashboard");
+
+    } catch (error) {
+
+      const err = error as AxiosError<ApiErrorResponse>;
+
+      const backendMessage =
+      err.response?.data?.message?.message ||
+      "Error al registrar usuario"
+
+      toast.error(backendMessage)
+
+    } finally {
+      setLoading(false);
     }
+
   };
 
   return (
@@ -174,7 +217,7 @@ const Register = () => {
                   <Label htmlFor="phone">Celular</Label>
                   <Input
                     id="phone"
-                    placeholder="55 1234 5678"
+                    placeholder="979 979 123"
                     value={formData.phone}
                     onChange={(e) => updateFormData("phone", e.target.value)}
                     className={errors.phone ? "border-destructive" : ""}
@@ -249,13 +292,14 @@ const Register = () => {
                     <ArrowLeft className="w-4 h-4" />
                     Atrás
                   </Button>
-                  <Button type="submit" className="flex-1" size="lg">
-                    Crear cuenta
+                  <Button type="submit" className="flex-1" size="lg" disabled={loading} >
+                    { loading ? "Creando..." : "Crear cuenta" }
                   </Button>
                 </div>
               </div>
             )}
           </form>
+
         </div>
 
         {/* Login Link */}
