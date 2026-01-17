@@ -1,18 +1,13 @@
 
-export interface RegisterRequest {
-
+export interface LoginRequest {
     email: string;
     password: string;
-    name: string;
-    lastName: string;
-    phone: string;
 }
 
-export interface RegisterResponse { 
+export interface LoginResponse {
     id: string;
     email: string;
     name: string;
     lastName: string;
     token: string;
 }
-
