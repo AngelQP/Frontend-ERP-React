@@ -1,6 +1,9 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import {type Insumo, type InsumoFormData, type LoadingState, type ApiError } from '@/types';
 import { toast } from 'sonner';
+
+import { getUnidadesMedida } from '@/api/insumos.api';
+import type { UnidadMedida } from '@/features/insumos/types/unidad-medida.types';
 
 // Datos iniciales mock (simula API)
 const initialInsumos: Insumo[] = [
@@ -20,6 +23,29 @@ export const useInsumos = () => {
   const [insumos, setInsumos] = useState<Insumo[]>(initialInsumos);
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
   const [error, setError] = useState<ApiError | null>(null);
+
+  // Para manejo de unidades de medida
+  const [unidadesMedida, setUnidadesMedida] = useState<UnidadMedida[]>([]);
+  const [loadingUnidades, setLoadingUnidades] = useState(false);
+  const [errorUnidades, setErrorUnidades] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUnidadesMedida = async () => {
+      try {
+        setLoadingUnidades(true);
+        const data = await getUnidadesMedida();
+        setUnidadesMedida(data);
+      } catch (err) {
+        console.error('Error cargando unidades de medida', err);
+        setErrorUnidades('No se pudieron cargar las unidades de medida');
+        toast.error('Error al cargar unidades de medida');
+      } finally {
+        setLoadingUnidades(false);
+      }
+    };
+
+    fetchUnidadesMedida();
+  }, []);
 
   // Insumos con stock bajo
   const insumosStockBajo = useMemo(() => 
@@ -167,5 +193,10 @@ export const useInsumos = () => {
     verificarStock,
     obtenerInsumo,
     STOCK_BAJO_UMBRAL,
+
+    // 👇 Unidades de medida
+    unidadesMedida,
+    loadingUnidades,
+    errorUnidades,
   };
 };

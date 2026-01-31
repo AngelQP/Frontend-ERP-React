@@ -28,19 +28,19 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { type Insumo, type InsumoFormData, UNIDADES_MEDIDA, type UnidadMedida } from "@/types";
+import { type Insumo, type InsumoFormData } from "@/types";
 
-const UNIDADES : UnidadMedida [] = ["kg", "g", "L", "ml", "pza"]; 
+import type { UnidadMedida } from "@/features/insumos/types/unidad-medida.types";
+
+
 
 const insumoSchema = z.object({
   nombre: z.string().trim().min(1, "El nombre es requerido").max(100, "Máximo 100 caracteres"),
 
   unidad_medida: z
-    .string()
-    .nonempty("Selecciona una unidad")
-    .refine((val) => UNIDADES.includes(val as any), {
-      message: "Unidad inválida",
-    }),    
+  .string()
+  .min(1, "Selecciona una unidad"),
+   
   // unidad_medida: z.enum(UNIDADES, { 
   //   required_error: "Selecciona una unidad" 
   // }),
@@ -78,6 +78,10 @@ interface InsumoDialogProps {
   insumo?: Insumo | null;
   onSubmit: (data: InsumoFormData) => Promise<void>;
   isLoading?: boolean;
+
+  // 👇 unidades de medida
+  unidadesMedida: UnidadMedida[];
+  loadingUnidades: boolean;
 }
 
 const InsumoDialog = ({
@@ -86,6 +90,8 @@ const InsumoDialog = ({
   insumo,
   onSubmit,
   isLoading = false,
+  unidadesMedida,
+  loadingUnidades
 }: InsumoDialogProps) => {
   const isEditing = !!insumo;
 
@@ -165,16 +171,16 @@ const InsumoDialog = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Unidad de medida</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+                  <Select onValueChange={field.onChange} value={field.value} disabled={loadingUnidades}>
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecciona unidad" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {UNIDADES_MEDIDA.map((unidad) => (
-                        <SelectItem key={unidad.value} value={unidad.value}>
-                          {unidad.label}
+                      {unidadesMedida.map((unidad) => (
+                        <SelectItem key={unidad.key} value={unidad.value}>
+                          {unidad.value}
                         </SelectItem>
                       ))}
                     </SelectContent>

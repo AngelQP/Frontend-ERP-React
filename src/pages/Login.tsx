@@ -10,6 +10,10 @@
 
   // import de consumo de api
   import { loginUser } from "@/api/auth.api";
+import { useAuth } from "@/context/AuthContext";
+
+  // import de login de AuthContext
+
 
   const Login = () => {
     const navigate = useNavigate();
@@ -17,6 +21,8 @@
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
     const [isLoading, setIsLoading] = useState(false);
+
+    const { login } = useAuth();
 
     // inicio de toast
     const { toast } = useToast();
@@ -46,9 +52,13 @@
         // Enviando datos del formulario
         const response = await loginUser({ email, password });
 
+        console.log(response.token)
+
+        // llamar a la función login del contexto de autenticación
+        login(response.token);
 
         // almacenar en localStorage o manejar el token según sea necesario
-        localStorage.setItem("token", response.token);
+        // localStorage.setItem("token", response.token);
 
         // Toast de bienvenida
         toast({

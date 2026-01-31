@@ -96,7 +96,7 @@ const Register = () => {
       };
 
       // Ver data del Form
-      // console.log("PAYLOAD REGISTER", payload);
+      console.log("PAYLOAD REGISTER", payload);
 
       await api.post("/auth/register", payload);
 

@@ -32,6 +32,11 @@ const Insumos = () => {
     editarInsumo,
     eliminarInsumo,
     STOCK_BAJO_UMBRAL,
+
+    // 👇 unidades de medida
+    unidadesMedida,
+    loadingUnidades,
+    // errorUnidades,
   } = useInsumos();
 
   const isLoading = loadingState === "loading";
@@ -205,6 +210,9 @@ const Insumos = () => {
         insumo={selectedInsumo}
         onSubmit={handleSubmit}
         isLoading={isLoading}
+        // Unidades de medida props
+        unidadesMedida={unidadesMedida}
+        loadingUnidades={loadingUnidades}
       />
 
       <DeleteConfirmDialog

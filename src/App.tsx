@@ -12,6 +12,10 @@ import Postres from "./pages/Postres";
 import Ventas from "./pages/Ventas";
 import NotFound from "./pages/NotFound";
 
+import ProtectedRoute from './routes/ProtectedRoute';
+import { AuthProvider } from "./context/AuthContext";
+
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -20,17 +24,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/insumos" element={<Insumos />} />
-          <Route path="/postres" element={<Postres />} />
-          <Route path="/ventas" element={<Ventas />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <AuthProvider>
+          <Routes>
+            {/** Rutas protegidas */}
+            <Route path="/" element={<Index />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+
+            {/** Rutas protegidas */}
+            <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/insumos" element={ <ProtectedRoute><Insumos /></ProtectedRoute>} />
+            <Route path="/postres" element={ <ProtectedRoute><Postres /></ProtectedRoute>} />
+            <Route path="/ventas" element={ <ProtectedRoute><Ventas /></ProtectedRoute>} />
+
+            {/* 404 */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
