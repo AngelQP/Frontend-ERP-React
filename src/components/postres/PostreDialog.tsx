@@ -29,11 +29,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Loader2, Plus, Trash2, Package } from "lucide-react";
-import { type Postre, type PostreFormData, type Insumo } from "@/types";
+import type { Postre, PostreFormData } from "@/features/postres/types/postre.types";
+import type { Insumo } from "@/features/insumos/types/insumos.type";
 
 const recetaItemSchema = z.object({
   insumo_id: z.string().min(1, "Selecciona un insumo"),
-  cantidad_utilizada: z
+  cantidad: z
     .number({ error: "Ingresa un número" })
     .positive("Debe ser mayor a 0"),
 });
@@ -44,6 +45,10 @@ const postreSchema = z.object({
   precio_referencia: z
     .number({ error: "Ingresa un número válido" })
     .positive("El precio debe ser mayor a 0"),
+  rendimiento_base: z
+    .number({ error: "Ingresa un número válido" })
+    .int("Debe ser un número entero")
+    .positive("Debe ser mayor a 0"),
   receta: z.array(recetaItemSchema).min(1, "Agrega al menos un insumo a la receta"),
 }).refine((data) => {
   // Check for duplicate insumos
@@ -63,7 +68,7 @@ interface PostreDialogProps {
   insumos: Insumo[];
   onSubmit: (data: PostreFormData) => Promise<void>;
   isLoading?: boolean;
-  calcularCosto: (receta: { insumo_id: string; cantidad_utilizada: number }[]) => number;
+  calcularCosto: (receta: { insumo_id: string; cantidad: number }[]) => number;
   obtenerInsumo: (id: string) => Insumo | undefined;
 }
 
@@ -86,6 +91,7 @@ const PostreDialog = ({
       nombre: "",
       descripcion: "",
       precio_referencia: 0,
+      rendimiento_base: 1,
       receta: [],
     },
   });
@@ -102,8 +108,8 @@ const PostreDialog = ({
   useEffect(() => {
     if (watchReceta && watchReceta.length > 0) {
       const validReceta = watchReceta
-        .filter((r): r is { insumo_id: string; cantidad_utilizada: number } => 
-          !!r.insumo_id && r.cantidad_utilizada > 0
+        .filter((r): r is { insumo_id: string; cantidad: number } => 
+          !!r.insumo_id && r.cantidad > 0
         );
       const costo = calcularCosto(validReceta);
       setCostoCalculado(costo);
@@ -120,6 +126,7 @@ const PostreDialog = ({
           nombre: postre.nombre,
           descripcion: postre.descripcion || "",
           precio_referencia: postre.precio_referencia,
+          rendimiento_base: postre.rendimiento_base,
           receta: postre.receta,
         });
       } else {
@@ -127,6 +134,7 @@ const PostreDialog = ({
           nombre: "",
           descripcion: "",
           precio_referencia: 0,
+          rendimiento_base: 1,
           receta: [],
         });
       }
@@ -143,7 +151,7 @@ const PostreDialog = ({
   };
 
   const handleAddInsumo = () => {
-    append({ insumo_id: "", cantidad_utilizada: 0 });
+    append({ insumo_id: "", cantidad: 0 });
   };
 
   // Insumos disponibles (no usados aún en la receta)
@@ -173,7 +181,7 @@ const PostreDialog = ({
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6" noValidate>
             {/* Basic Info */}
             <div className="space-y-4">
               <FormField
@@ -228,6 +236,28 @@ const PostreDialog = ({
                   </FormItem>
                 )}
               />
+
+              <FormField
+                control={form.control}
+                name="rendimiento_base"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Porciones</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        step="1"
+                        min="1"
+                        placeholder="1"
+                        {...field}
+                        onChange={(e) => field.onChange(e.target.valueAsNumber)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
             </div>
 
             {/* Recipe Section */}
@@ -314,7 +344,7 @@ const PostreDialog = ({
 
                           <FormField
                             control={form.control}
-                            name={`receta.${index}.cantidad_utilizada`}
+                            name={`receta.${index}.cantidad`}
                             render={({ field }) => (
                               <FormItem>
                                 <FormLabel className="text-xs">

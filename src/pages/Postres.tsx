@@ -5,9 +5,9 @@ import { Badge } from "@/components/ui/badge";
 import { Plus, Search, Edit2, Trash2, Cake, Package } from "lucide-react";
 import { useState } from "react";
 import { usePostres } from "@/hooks/usePostres";
-import { type Postre, type PostreFormData } from "@/types";
 import PostreDialog from "@/components/postres/PostreDialog";
 import DeleteConfirmDialog from "@/components/shared/DeleteConfirmDialog";
+import type { Postre, PostreFormData } from "@/features/postres/types/postre.types";
 
 const Postres = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -28,9 +28,14 @@ const Postres = () => {
 
   const isLoading = loadingState === "loading";
 
-  const filteredDesserts = postresConCosto.filter((item) =>
-    item.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // const filteredDesserts = postresConCosto.filter((item) =>
+  //   item.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+  // );
+
+  const filteredDesserts = postresConCosto.filter((item) => {
+    const nombre = item.nombre ?? "";
+    return nombre.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const handleOpenCreate = () => {
     setSelectedPostre(null);

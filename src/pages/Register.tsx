@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Check, User, Lock, ArrowRight, ArrowLeft, Cake } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
-import { api } from "@/lib/axios";
+import { apiPublic } from "@/lib/axios";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import type { ApiErrorResponse } from "@/features/auth/types/api.error";
@@ -98,7 +98,7 @@ const Register = () => {
       // Ver data del Form
       console.log("PAYLOAD REGISTER", payload);
 
-      await api.post("/auth/register", payload);
+      await apiPublic.post("/auth/register", payload);
 
       toast.success("Usuario registrado correctamente 🎉");
 

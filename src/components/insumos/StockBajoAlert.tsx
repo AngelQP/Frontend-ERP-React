@@ -1,6 +1,6 @@
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import type { Insumo } from "@/features/insumos/types/insumos.type";
 import { AlertTriangle } from "lucide-react";
-import { type Insumo } from "@/types";
 
 interface StockBajoAlertProps {
   insumos: Insumo[];

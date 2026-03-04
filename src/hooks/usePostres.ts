@@ -1,73 +1,81 @@
-import { useState, useCallback, useMemo } from 'react';
-import { type Postre, type PostreFormData, type PostreConCosto, type RecetaItem, type  LoadingState,  type ApiError, BUSINESS_ERRORS } from '@/types';
+import { useState, useCallback, useMemo, useEffect } from 'react';
+import { type  LoadingState,  type ApiError, BUSINESS_ERRORS } from '@/types';
 import { toast } from 'sonner';
 import { useInsumos } from './useInsumos';
 
+import {
+  createPostre,
+  updatePostre,
+  deletePostre,
+  getPostres,
+} from "@/api/postre.api";
+import type { Postre, PostreConCosto, PostreFormData, RecetaItem } from '@/features/postres/types/postre.types';
+
 // Datos iniciales mock
-const initialPostres: Postre[] = [
-  {
-    id: '1',
-    nombre: 'Pastel de Chocolate',
-    descripcion: 'Delicioso pastel de 3 capas',
-    precio_referencia: 450,
-    receta: [
-      { insumo_id: '1', cantidad_utilizada: 0.5 }, // Harina
-      { insumo_id: '2', cantidad_utilizada: 0.3 }, // Azúcar
-      { insumo_id: '3', cantidad_utilizada: 4 },   // Huevos
-      { insumo_id: '6', cantidad_utilizada: 0.2 }, // Chocolate
-    ],
-  },
-  {
-    id: '2',
-    nombre: 'Cheesecake NY',
-    descripcion: 'Clásico cheesecake horneado',
-    precio_referencia: 380,
-    receta: [
-      { insumo_id: '3', cantidad_utilizada: 3 },   // Huevos
-      { insumo_id: '4', cantidad_utilizada: 0.2 }, // Mantequilla
-      { insumo_id: '2', cantidad_utilizada: 0.2 }, // Azúcar
-    ],
-  },
-  {
-    id: '3',
-    nombre: 'Cupcakes (12)',
-    descripcion: 'Docena de cupcakes variados',
-    precio_referencia: 180,
-    receta: [
-      { insumo_id: '1', cantidad_utilizada: 0.3 }, // Harina
-      { insumo_id: '2', cantidad_utilizada: 0.2 }, // Azúcar
-      { insumo_id: '3', cantidad_utilizada: 2 },   // Huevos
-      { insumo_id: '7', cantidad_utilizada: 10 },  // Vainilla
-    ],
-  },
-  {
-    id: '4',
-    nombre: 'Brownies (6)',
-    descripcion: 'Media docena de brownies',
-    precio_referencia: 90,
-    receta: [
-      { insumo_id: '6', cantidad_utilizada: 0.15 }, // Chocolate
-      { insumo_id: '4', cantidad_utilizada: 0.1 },  // Mantequilla
-      { insumo_id: '3', cantidad_utilizada: 2 },    // Huevos
-    ],
-  },
-];
+// const initialPostres: Postre[] = [
+//   {
+//     id: '1',
+//     nombre: 'Pastel de Chocolate',
+//     descripcion: 'Delicioso pastel de 3 capas',
+//     precio_referencia: 450,
+//     receta: [
+//       { insumo_id: '1', cantidad: 0.5 }, // Harina
+//       { insumo_id: '2', cantidad: 0.3 }, // Azúcar
+//       { insumo_id: '3', cantidad: 4 },   // Huevos
+//       { insumo_id: '6', cantidad: 0.2 }, // Chocolate
+//     ],
+//   },
+//   {
+//     id: '2',
+//     nombre: 'Cheesecake NY',
+//     descripcion: 'Clásico cheesecake horneado',
+//     precio_referencia: 380,
+//     receta: [
+//       { insumo_id: '3', cantidad: 3 },   // Huevos
+//       { insumo_id: '4', cantidad: 0.2 }, // Mantequilla
+//       { insumo_id: '2', cantidad: 0.2 }, // Azúcar
+//     ],
+//   },
+//   {
+//     id: '3',
+//     nombre: 'Cupcakes (12)',
+//     descripcion: 'Docena de cupcakes variados',
+//     precio_referencia: 180,
+//     receta: [
+//       { insumo_id: '1', cantidad: 0.3 }, // Harina
+//       { insumo_id: '2', cantidad: 0.2 }, // Azúcar
+//       { insumo_id: '3', cantidad: 2 },   // Huevos
+//       { insumo_id: '7', cantidad: 10 },  // Vainilla
+//     ],
+//   },
+//   {
+//     id: '4',
+//     nombre: 'Brownies (6)',
+//     descripcion: 'Media docena de brownies',
+//     precio_referencia: 90,
+//     receta: [
+//       { insumo_id: '6', cantidad_utilizada: 0.15 }, // Chocolate
+//       { insumo_id: '4', cantidad_utilizada: 0.1 },  // Mantequilla
+//       { insumo_id: '3', cantidad_utilizada: 2 },    // Huevos
+//     ],
+//   },
+// ];
 
 export const usePostres = () => {
-  const [postres, setPostres] = useState<Postre[]>(initialPostres);
+  const [postres, setPostres] = useState<Postre[]>([]);
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
   const [error, setError] = useState<ApiError | null>(null);
   const { insumos, obtenerInsumo } = useInsumos();
 
   // Simula delay de API
-  const simulateApi = () => new Promise(resolve => setTimeout(resolve, 300));
+  // const simulateApi = () => new Promise(resolve => setTimeout(resolve, 300));
 
   // Calcular costo de una receta
   const calcularCostoReceta = useCallback((receta: RecetaItem[]): number => {
     return receta.reduce((total, item) => {
       const insumo = obtenerInsumo(item.insumo_id);
       if (insumo) {
-        return total + (insumo.costo_unitario * item.cantidad_utilizada);
+        return total + (insumo.costo_unitario * item.cantidad);
       }
       return total;
     }, 0);
@@ -104,7 +112,7 @@ export const usePostres = () => {
 
     // Verificar cantidades válidas
     for (const item of receta) {
-      if (item.cantidad_utilizada <= 0) {
+      if (item.cantidad <= 0) {
         return { valida: false, error: BUSINESS_ERRORS.CANTIDAD_INVALIDA };
       }
     }
@@ -114,94 +122,122 @@ export const usePostres = () => {
 
   // Crear postre
   const crearPostre = useCallback(async (data: PostreFormData) => {
-    setLoadingState('loading');
+    setLoadingState("loading");
     setError(null);
-    
+
     try {
-      await simulateApi();
-      
-      // Validaciones
-      if (data.precio_referencia <= 0) {
-        throw { code: 'PRECIO_INVALIDO', message: BUSINESS_ERRORS.PRECIO_INVALIDO };
-      }
+      const nuevo = await createPostre(data);
 
-      const validacion = validarReceta(data.receta);
-      if (!validacion.valida) {
-        throw { code: 'RECETA_INVALIDA', message: validacion.error };
-      }
-
-      const nuevoPostre: Postre = {
-        id: Date.now().toString(),
-        nombre: data.nombre,
-        descripcion: data.descripcion,
-        precio_referencia: data.precio_referencia,
-        receta: data.receta,
+      const postreAdaptado: Postre = {
+        id: nuevo.id,
+        nombre: nuevo.nombre,
+        descripcion: nuevo.descripcion,
+        precio_referencia: Number(nuevo.precio_referencia),
+        rendimiento_base: Number(nuevo.rendimiento_base),
+        receta: nuevo.receta.map((r: any) => ({
+          insumo_id: r.insumo_id,  // ✅
+          cantidad: Number(r.cantidad),
+        })),
       };
 
-      setPostres(prev => [...prev, nuevoPostre]);
-      setLoadingState('success');
-      toast.success('Postre creado correctamente');
-      return nuevoPostre;
-    } catch (err) {
-      const apiError = err as ApiError;
-      setError(apiError);
-      setLoadingState('error');
-      toast.error(apiError.message || 'Error al crear postre');
+      setPostres((prev) => [...prev, postreAdaptado]);
+
+      setLoadingState("success");
+      toast.success("Postre creado correctamente");
+    } catch (err: any) {
+      setLoadingState("error");
+      toast.error(err.response?.data?.message || "Error al crear postre");
       throw err;
     }
-  }, [validarReceta]);
+  }, []);
 
   // Editar postre
-  const editarPostre = useCallback(async (id: string, data: Partial<PostreFormData>) => {
-    setLoadingState('loading');
-    setError(null);
-    
-    try {
-      await simulateApi();
-      
-      if (data.precio_referencia !== undefined && data.precio_referencia <= 0) {
-        throw { code: 'PRECIO_INVALIDO', message: BUSINESS_ERRORS.PRECIO_INVALIDO };
-      }
+  const editarPostre = useCallback(
+    async (id: string, data: PostreFormData) => {
+      setLoadingState("loading");
+      setError(null);
 
-      if (data.receta) {
-        const validacion = validarReceta(data.receta);
-        if (!validacion.valida) {
-          throw { code: 'RECETA_INVALIDA', message: validacion.error };
-        }
-      }
+      try {
+        const actualizado = await updatePostre(id, data);
 
-      setPostres(prev => prev.map(p => 
-        p.id === id ? { ...p, ...data } : p
-      ));
-      
-      setLoadingState('success');
-      toast.success('Postre actualizado correctamente');
-    } catch (err) {
-      const apiError = err as ApiError;
-      setError(apiError);
-      setLoadingState('error');
-      toast.error(apiError.message || 'Error al actualizar postre');
-      throw err;
-    }
-  }, [validarReceta]);
+        const postreAdaptado: Postre = {
+          id: actualizado.id,
+          nombre: actualizado.nombre,
+          descripcion: actualizado.descripcion,
+          precio_referencia: Number(actualizado.precio_referencia),
+          rendimiento_base: Number(actualizado.rendimiento_base),
+          receta: actualizado.receta.map((r: any) => ({
+            insumo_id: r.insumo_id, 
+            cantidad: Number(r.cantidad),
+          })),
+        };
+
+        setPostres((prev) =>
+          prev.map((p) => (p.id === id ? postreAdaptado : p))
+        );
+
+        setLoadingState("success");
+        toast.success("Postre actualizado correctamente");
+      } catch (err: any) {
+        setLoadingState("error");
+        toast.error(err.response?.data?.message || "Error al actualizar");
+        throw err;
+      }
+    },
+    []
+  );
 
   // Eliminar postre
   const eliminarPostre = useCallback(async (id: string) => {
-    setLoadingState('loading');
+    setLoadingState("loading");
     setError(null);
-    
+
     try {
-      await simulateApi();
-      setPostres(prev => prev.filter(p => p.id !== id));
-      setLoadingState('success');
-      toast.success('Postre eliminado correctamente');
-    } catch (err) {
-      const apiError = err as ApiError;
-      setError(apiError);
-      setLoadingState('error');
-      toast.error(apiError.message || 'Error al eliminar postre');
+      await deletePostre(id);
+
+      setPostres((prev) => prev.filter((p) => p.id !== id));
+
+      setLoadingState("success");
+      toast.success("Postre eliminado correctamente");
+    } catch (err: any) {
+      setLoadingState("error");
+      toast.error(err.response?.data?.message || "Error al eliminar");
       throw err;
     }
+  }, []);
+
+  // Obtener todos los postres
+  useEffect(() => {
+    const fetchPostres = async () => {
+      setLoadingState("loading");
+      try {
+        const data = await getPostres();
+
+        console.log("DATA REAL DEL BACKEND:", {data});
+
+        const adaptados: Postre[] = data.map((p: any) => ({
+          id: p.id,
+          nombre: p.nombre,
+          descripcion: p.descripcion,
+          precio_referencia: Number(p.precio_referencia),
+          rendimiento_base: Number(p.rendimiento_base),
+          receta: p.receta.map((r: any) => ({
+            insumo_id: r.insumo_id, 
+            cantidad: Number(r.cantidad),
+          })),
+        }));
+
+        console.log("DATA ADAPTADOS DEL BACKEND:", {adaptados});
+
+        setPostres(adaptados);
+        setLoadingState("success");
+      } catch (err) {
+        setLoadingState("error");
+        toast.error("Error al cargar postres");
+      }
+    };
+
+    fetchPostres();
   }, []);
 
   // Obtener postre por ID

@@ -9,19 +9,26 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Search, Edit2, Trash2, Package } from "lucide-react";
+import { Plus, Search, Edit2, Trash2, Package, SendToBack } from "lucide-react";
 import { useState } from "react";
 import { useInsumos } from "@/hooks/useInsumos";
-import { type Insumo, type InsumoFormData } from "@/types";
+import { type InsumoFormData } from "@/features/insumos/types/insumos.type";
 import InsumoDialog from "@/components/insumos/InsumoDialog";
 import DeleteConfirmDialog from "@/components/shared/DeleteConfirmDialog";
 import StockBajoAlert from "@/components/insumos/StockBajoAlert";
+import type { Insumo } from "@/features/insumos/types/insumos.type";
+import OperacionDialog from "@/components/insumos/OperacionDialog";
 
 const Insumos = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInsumo, setSelectedInsumo] = useState<Insumo | null>(null);
+
+  console.log("rendering insumos page");
+
+  // Estado para el modal de movimeintos de insumos
+  const [movementDialogOpen, setMovementDialogOpen] = useState(false);
 
   const {
     insumos,
@@ -31,6 +38,7 @@ const Insumos = () => {
     crearInsumo,
     editarInsumo,
     eliminarInsumo,
+    registrarMovimiento,
     STOCK_BAJO_UMBRAL,
 
     // 👇 unidades de medida
@@ -40,6 +48,11 @@ const Insumos = () => {
   } = useInsumos();
 
   const isLoading = loadingState === "loading";
+
+  // Handler para apertura de movimientos de insumos
+  const handleOpenMovement = () => {
+    setMovementDialogOpen(true);
+  };
 
   const filteredIngredients = insumos.filter((item) =>
     item.nombre.toLowerCase().includes(searchTerm.toLowerCase())
@@ -84,7 +97,7 @@ const Insumos = () => {
         <div>
           <p className="text-sm text-muted-foreground">Valor total del inventario</p>
           <p className="text-2xl font-bold text-foreground">
-            ${valorTotalInventario.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+            S/. {valorTotalInventario.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
           </p>
         </div>
         <div className="text-right">
@@ -104,10 +117,30 @@ const Insumos = () => {
             className="pl-9"
           />
         </div>
-        <Button className="gap-2" onClick={handleOpenCreate}>
+
+        {/* Botones de nuevo insumo y movimiento de insumo */}
+        <div className="flex gap-2">
+
+          <Button className="gap-2" onClick={handleOpenCreate}>
+            <Plus className="w-4 h-4" />
+            Nuevo insumo
+          </Button>
+
+          <Button
+            variant="outline"
+            className="gap-2 border-primary text-primary"
+            onClick={handleOpenMovement}
+          >
+            <SendToBack className="w-4 h-4" />
+            Registrar Operación
+          </Button>
+
+        </div>
+        {/* <Button className="gap-2" onClick={handleOpenCreate}>
           <Plus className="w-4 h-4" />
           Nuevo insumo
-        </Button>
+        </Button> */}
+
       </div>
 
       {/* Table */}
@@ -119,7 +152,7 @@ const Insumos = () => {
               <TableHead>Unidad</TableHead>
               <TableHead className="text-right">Costo/Unidad</TableHead>
               <TableHead className="text-right">Stock</TableHead>
-              <TableHead className="text-right">Valor total</TableHead>
+              {/* <TableHead className="text-right">Valor total</TableHead> */}
               <TableHead className="w-24"></TableHead>
             </TableRow>
           </TableHeader>
@@ -135,10 +168,10 @@ const Insumos = () => {
                   </div>
                 </TableCell>
                 <TableCell className="text-muted-foreground">
-                  {item.unidad_medida}
+                  {item.unidad_medida.toUpperCase()}
                 </TableCell>
                 <TableCell className="text-right">
-                  ${item.costo_unitario.toFixed(2)}
+                  S/. {item.costo_unitario.toFixed(2)}
                 </TableCell>
                 <TableCell className="text-right">
                   <span
@@ -151,11 +184,12 @@ const Insumos = () => {
                     {item.cantidad_disponible} {item.unidad_medida}
                   </span>
                 </TableCell>
-                <TableCell className="text-right font-medium">
+                {/* !TODO: Fila de valor total */}
+                {/* <TableCell className="text-right font-medium">
                   ${(item.costo_unitario * item.cantidad_disponible).toFixed(2)}
-                </TableCell>
+                </TableCell> */}
                 <TableCell>
-                  <div className="flex justify-end gap-1">
+                  <div className="flex justify-end gap-3">
                     <Button
                       variant="ghost"
                       size="icon"
@@ -223,6 +257,28 @@ const Insumos = () => {
         onConfirm={handleDelete}
         isLoading={isLoading}
       />
+
+      {/* Movimiento Dialog pendiente */}
+      <OperacionDialog
+        open={movementDialogOpen}
+        onOpenChange={setMovementDialogOpen}
+        onSubmit={async (data) => {
+          await registrarMovimiento({
+            insumo_id: data.insumoId,
+            cantidad: data.cantidad,
+            tipo: data.tipo,
+            motivo: data.motivo,
+            costoUnitario: data.costoUnitario,
+          });
+        }}
+        isLoading={loadingState === "loading"}
+        insumosOptions={insumos.map((i) => ({
+          id: String(i.id),
+          nombre: i.nombre,
+        }))}
+      />
+
+
     </AppLayout>
   );
 };

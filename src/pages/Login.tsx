@@ -10,7 +10,7 @@
 
   // import de consumo de api
   import { loginUser } from "@/api/auth.api";
-import { useAuth } from "@/context/AuthContext";
+  import { useAuth } from "@/context/AuthContext";
 
   // import de login de AuthContext
 
@@ -47,7 +47,7 @@ import { useAuth } from "@/context/AuthContext";
       try {
         setIsLoading(true);
 
-        console.log("Usuario :", { email, password });
+        // console.log("Usuario :", { email, password });
 
         // Enviando datos del formulario
         const response = await loginUser({ email, password });

@@ -1,26 +1,25 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
-import {type Insumo, type InsumoFormData, type LoadingState, type ApiError } from '@/types';
+import { type LoadingState, type ApiError } from '@/types';
 import { toast } from 'sonner';
 
 import { getUnidadesMedida } from '@/api/insumos.api';
 import type { UnidadMedida } from '@/features/insumos/types/unidad-medida.types';
+import type { Insumo, InsumoFormData } from '@/features/insumos/types/insumos.type';
+
+import { createInsumoApi, listarInsumosConStock } from '@/api/insumos.api';
+
+import { crearMovimientoApi, type MovimientoPayload } from '@/api/movimiento.api';
+
 
 // Datos iniciales mock (simula API)
-const initialInsumos: Insumo[] = [
-  { id: '1', nombre: 'Harina', unidad_medida: 'kg', costo_unitario: 25, cantidad_disponible: 10 },
-  { id: '2', nombre: 'Azúcar', unidad_medida: 'kg', costo_unitario: 30, cantidad_disponible: 8 },
-  { id: '3', nombre: 'Huevos', unidad_medida: 'pza', costo_unitario: 4, cantidad_disponible: 24 },
-  { id: '4', nombre: 'Mantequilla', unidad_medida: 'kg', costo_unitario: 120, cantidad_disponible: 3 },
-  { id: '5', nombre: 'Leche', unidad_medida: 'L', costo_unitario: 28, cantidad_disponible: 5 },
-  { id: '6', nombre: 'Chocolate', unidad_medida: 'kg', costo_unitario: 180, cantidad_disponible: 2 },
-  { id: '7', nombre: 'Vainilla', unidad_medida: 'ml', costo_unitario: 0.5, cantidad_disponible: 200 },
-  { id: '8', nombre: 'Polvo para hornear', unidad_medida: 'kg', costo_unitario: 85, cantidad_disponible: 1 },
-];
+// const initialInsumos: Insumo[] = [
+//   { id: '1', nombre: 'Harina', unidad_medida: 'kg', costo_unitario: 25, cantidad_disponible: 10 },
+// ];
 
 const STOCK_BAJO_UMBRAL = 5;
 
 export const useInsumos = () => {
-  const [insumos, setInsumos] = useState<Insumo[]>(initialInsumos);
+  const [insumos, setInsumos] = useState<Insumo[]>([]);
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
   const [error, setError] = useState<ApiError | null>(null);
 
@@ -29,7 +28,24 @@ export const useInsumos = () => {
   const [loadingUnidades, setLoadingUnidades] = useState(false);
   const [errorUnidades, setErrorUnidades] = useState<string | null>(null);
 
+  const fetchInsumos = useCallback(async () => {
+    setLoadingState("loading");
+    setError(null);
+
+    try {
+      const data = await listarInsumosConStock();
+      setInsumos(data);
+      setLoadingState("success");
+    } catch (err) {
+      setError({ code: "FETCH_ERROR", message: "Error al cargar insumos" });
+      setLoadingState("error");
+      toast.error("Error al cargar insumos");
+    }
+  }, []);
+
   useEffect(() => {
+    fetchInsumos();
+
     const fetchUnidadesMedida = async () => {
       try {
         setLoadingUnidades(true);
@@ -45,7 +61,7 @@ export const useInsumos = () => {
     };
 
     fetchUnidadesMedida();
-  }, []);
+  }, [fetchInsumos]);
 
   // Insumos con stock bajo
   const insumosStockBajo = useMemo(() => 
@@ -68,25 +84,15 @@ export const useInsumos = () => {
     setError(null);
     
     try {
-      await simulateApi();
-      
-      // Validaciones de negocio
-      if (data.cantidad_disponible < 0) {
-        throw { code: 'CANTIDAD_INVALIDA', message: 'La cantidad no puede ser negativa' };
-      }
-      if (data.costo_unitario <= 0) {
-        throw { code: 'COSTO_INVALIDO', message: 'El costo debe ser mayor a 0' };
-      }
 
-      const nuevoInsumo: Insumo = {
-        id: Date.now().toString(),
-        ...data,
-      };
+      const nuevoInsumo = await createInsumoApi(data);
 
+      // Agregamos a la lista solo después de que el servidor confirma
       setInsumos(prev => [...prev, nuevoInsumo]);
       setLoadingState('success');
       toast.success('Insumo creado correctamente');
       return nuevoInsumo;
+
     } catch (err) {
       const apiError = err as ApiError;
       setError(apiError);
@@ -103,14 +109,6 @@ export const useInsumos = () => {
     
     try {
       await simulateApi();
-      
-      // Validaciones
-      if (data.cantidad_disponible !== undefined && data.cantidad_disponible < 0) {
-        throw { code: 'CANTIDAD_INVALIDA', message: 'La cantidad no puede ser negativa' };
-      }
-      if (data.costo_unitario !== undefined && data.costo_unitario <= 0) {
-        throw { code: 'COSTO_INVALIDO', message: 'El costo debe ser mayor a 0' };
-      }
 
       setInsumos(prev => prev.map(i => 
         i.id === id ? { ...i, ...data } : i
@@ -145,6 +143,44 @@ export const useInsumos = () => {
       throw err;
     }
   }, []);
+
+  // Registrar movimiento de insumo (ingreso/salida/ajuste/merma)
+  const registrarMovimiento = useCallback(
+    async (payload: MovimientoPayload) => {
+      setLoadingState("loading");
+      setError(null);
+
+      try {
+        const updated = await crearMovimientoApi(payload);
+
+        // Volvemos a consultar inventario actualizado
+        // await fetchInsumos();
+
+        setInsumos(prev =>
+          prev.map(insumo =>
+            insumo.id === updated.insumo_id
+              ? {
+                  ...insumo,
+                  cantidad_disponible: updated.stock_actual,
+                  costo_unitario: updated.costo_promedio
+                }
+              : insumo
+          )
+        );
+
+        setLoadingState("success");
+        toast.success("Operación registrada correctamente");
+      } catch (err) {
+        const apiError = err as ApiError;
+        setError(apiError);
+        setLoadingState("error");
+        toast.error(apiError.message || "Error al registrar operación");
+        throw err;
+      }
+    },
+    []
+  );
+
 
   // Descontar stock (usado por ventas)
   const descontarStock = useCallback((consumos: { insumo_id: string; cantidad: number }[]) => {
@@ -189,6 +225,7 @@ export const useInsumos = () => {
     crearInsumo,
     editarInsumo,
     eliminarInsumo,
+    registrarMovimiento,
     descontarStock,
     verificarStock,
     obtenerInsumo,

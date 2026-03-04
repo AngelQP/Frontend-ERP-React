@@ -28,10 +28,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { type Insumo, type InsumoFormData } from "@/types";
 
 import type { UnidadMedida } from "@/features/insumos/types/unidad-medida.types";
-
+import type { Insumo, InsumoFormData } from "@/features/insumos/types/insumos.type";
 
 
 const insumoSchema = z.object({
@@ -45,29 +44,6 @@ const insumoSchema = z.object({
   //   required_error: "Selecciona una unidad" 
   // }),
 
-   cantidad_disponible: z.preprocess(
-    (val) => (val === "" || val === null ? 0 : Number(val)),
-    z
-      .number({
-        error: "Ingresa un número válido",
-      })
-      .min(0, "La cantidad no puede ser negativa")
-  ),
-  // cantidad_disponible: z.coerce
-  //   .number({ invalid_type_error: "Ingresa un número válido" })
-  //   .min(0, "La cantidad no puede ser negativa"),
-
-  costo_unitario: z.preprocess(
-    (val) => (val === "" || val === null ? 0 : Number(val)),
-    z
-      .number({
-        error: "Ingresa un número válido",
-      })
-      .positive("El costo debe ser mayor a 0")
-  ),
-  // costo_unitario: z.coerce
-  //   .number({ invalid_type_error: "Ingresa un número válido" })
-  //   .positive("El costo debe ser mayor a 0"),
 });
 
 type InsumoFormValues = z.infer<typeof insumoSchema>;
@@ -99,9 +75,7 @@ const InsumoDialog = ({
     resolver: zodResolver(insumoSchema),
     defaultValues: {
       nombre: "",
-      unidad_medida: "kg",
-      cantidad_disponible: 0,
-      costo_unitario: 0,
+      unidad_medida: "kg"
     },
   });
 
@@ -111,16 +85,12 @@ const InsumoDialog = ({
       if (insumo) {
         form.reset({
           nombre: insumo.nombre,
-          unidad_medida: insumo.unidad_medida,
-          cantidad_disponible: insumo.cantidad_disponible,
-          costo_unitario: insumo.costo_unitario,
+          unidad_medida: insumo.unidad_medida
         });
       } else {
         form.reset({
           nombre: "",
-          unidad_medida: "kg",
-          cantidad_disponible: 0,
-          costo_unitario: 0,
+          unidad_medida: "kg"
         });
       }
     }
@@ -190,7 +160,7 @@ const InsumoDialog = ({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            {/* <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="cantidad_disponible"
@@ -198,13 +168,6 @@ const InsumoDialog = ({
                   <FormItem>
                     <FormLabel>Cantidad disponible</FormLabel>
                     <FormControl>
-                      {/* <Input
-                        type="number"
-                        step="0.01"
-                        min="0"
-                        placeholder="0"
-                        {...field}
-                      /> */}
                       <Input
                         type="number"
                         step="0.01"
@@ -246,7 +209,7 @@ const InsumoDialog = ({
                   </FormItem>
                 )}
               />
-            </div>
+            </div> */}
 
             <DialogFooter>
               <Button

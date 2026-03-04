@@ -9,59 +9,59 @@ export interface User {
 }
 
 // Unidades de medida válidas
-export type UnidadMedida = 'kg' | 'g' | 'L' | 'ml' | 'pza';
+// export type UnidadMedida = 'kg' | 'g' | 'L' | 'ml' | 'pza';
 
-export const UNIDADES_MEDIDA: { value: UnidadMedida; label: string }[] = [
-  { value: 'kg', label: 'Kilogramos (kg)' },
-  { value: 'g', label: 'Gramos (g)' },
-  { value: 'L', label: 'Litros (L)' },
-  { value: 'ml', label: 'Mililitros (ml)' },
-  { value: 'pza', label: 'Piezas (pza)' },
-];
+// export const UNIDADES_MEDIDA: { value: UnidadMedida; label: string }[] = [
+//   { value: 'kg', label: 'Kilogramos (kg)' },
+//   { value: 'g', label: 'Gramos (g)' },
+//   { value: 'L', label: 'Litros (L)' },
+//   { value: 'ml', label: 'Mililitros (ml)' },
+//   { value: 'pza', label: 'Piezas (pza)' },
+// ];
 
 // ============= INSUMOS =============
-export interface Insumo {
-  id: string;
-  nombre: string;
-  unidad_medida: UnidadMedida;
-  cantidad_disponible: number;
-  costo_unitario: number;
-}
+// export interface Insumo {
+//   id: string;
+//   nombre: string;
+//   unidad_medida: UnidadMedida;
+//   cantidad_disponible: number;
+//   costo_unitario: number;
+// }
 
-export interface InsumoFormData {
-  nombre: string;
-  unidad_medida: UnidadMedida;
-  cantidad_disponible: number;
-  costo_unitario: number;
-}
+// export interface InsumoFormData {
+//   nombre: string;
+//   unidad_medida: UnidadMedida;
+//   cantidad_disponible: number;
+//   costo_unitario: number;
+// }
 
-// ============= POSTRES =============
+// // ============= POSTRES =============
 export interface RecetaItem {
   insumo_id: string;
   cantidad_utilizada: number;
 }
 
-export interface Postre {
-  id: string;
-  nombre: string;
-  descripcion?: string;
-  precio_referencia: number;
-  receta: RecetaItem[];
-  imagen_url?: string;
-}
+// export interface Postre {
+//   id: string;
+//   nombre: string;
+//   descripcion?: string;
+//   precio_referencia: number;
+//   receta: RecetaItem[];
+//   imagen_url?: string;
+// }
 
-export interface PostreFormData {
-  nombre: string;
-  descripcion?: string;
-  precio_referencia: number;
-  receta: RecetaItem[];
-}
+// export interface PostreFormData {
+//   nombre: string;
+//   descripcion?: string;
+//   precio_referencia: number;
+//   receta: RecetaItem[];
+// }
 
-// Postre con costo calculado (para mostrar en UI)
-export interface PostreConCosto extends Postre {
-  costo_total: number;
-  margen: number;
-}
+// // Postre con costo calculado (para mostrar en UI)
+// export interface PostreConCosto extends Postre {
+//   costo_total: number;
+//   margen: number;
+// }
 
 // ============= VENTAS =============
 export interface Venta {
