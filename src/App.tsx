@@ -11,6 +11,7 @@ import Insumos from "./pages/Insumos";
 import Postres from "./pages/Postres";
 import Ventas from "./pages/Ventas";
 import NotFound from "./pages/NotFound";
+import Preparaciones from "./pages/Preparaciones";
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthProvider } from "./context/AuthContext";
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/insumos" element={ <ProtectedRoute><Insumos /></ProtectedRoute>} />
             <Route path="/postres" element={ <ProtectedRoute><Postres /></ProtectedRoute>} />
             <Route path="/ventas" element={ <ProtectedRoute><Ventas /></ProtectedRoute>} />
+            <Route path="/preparaciones" element={ <ProtectedRoute><Preparaciones /></ProtectedRoute>} />
 
             {/* 404 */}
             <Route path="*" element={<NotFound />} />

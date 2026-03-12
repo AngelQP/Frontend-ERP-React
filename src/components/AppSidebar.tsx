@@ -9,6 +9,7 @@ import {
   X,
   ChevronLeft,
   LogOut,
+  ChefHat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -18,6 +19,7 @@ const menuItems = [
   { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
   { icon: Package, label: "Insumos", path: "/insumos" },
   { icon: Cake, label: "Postres", path: "/postres" },
+  { icon: ChefHat, label: "Preparaciones", path: "/preparaciones" },
   { icon: ShoppingCart, label: "Ventas", path: "/ventas" },
 ];
 
