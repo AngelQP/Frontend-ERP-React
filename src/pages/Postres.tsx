@@ -145,13 +145,13 @@ const Postres = () => {
               <div>
                 <p className="text-xs text-muted-foreground">Precio</p>
                 <p className="text-lg font-bold text-foreground">
-                  ${dessert.precio_referencia}
+                  S/. {dessert.precio_referencia}
                 </p>
               </div>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Costo</p>
                 <p className="text-sm font-medium text-muted-foreground">
-                  ${dessert.costo_total.toFixed(2)}
+                  S/. {dessert.costo_total.toFixed(2)}
                 </p>
               </div>
               <div className="text-right">

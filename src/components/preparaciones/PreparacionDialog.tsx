@@ -86,6 +86,7 @@ const PreparacionDialog = ({
   useEffect(() => {
     if (postreSeleccionado) {
       form.setValue("porcionesPlanificadas", postreSeleccionado.rendimiento_base);
+      form.setValue("porcionesReales", postreSeleccionado.rendimiento_base);
     }
   }, [postreSeleccionado, form]);
 
@@ -97,6 +98,7 @@ const PreparacionDialog = ({
   const handleSubmit = async (values: PreparacionFormValues) => {
     try {
       await onSubmit(values);
+      form.reset()
       onOpenChange(false);
     } catch {
       // manejado por hook
@@ -105,11 +107,7 @@ const PreparacionDialog = ({
 
   useEffect(() => {
     if (open) {
-      form.reset({
-        postre_id: "",
-        porcionesPlanificadas: 1,
-        porcionesReales: 1,
-      });
+      form.reset();
     }
   }, [open, form]);
 
@@ -170,10 +168,16 @@ const PreparacionDialog = ({
                       type="number"
                       min="1"
                       step="1"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(e.target.valueAsNumber)
-                      }
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (value === "") {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(Number(value));
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
@@ -193,10 +197,16 @@ const PreparacionDialog = ({
                       type="number"
                       min="1"
                       step="1"
-                      {...field}
-                      onChange={(e) =>
-                        field.onChange(e.target.valueAsNumber)
-                      }
+                      value={field.value ?? ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+
+                        if (value === "") {
+                          field.onChange(undefined);
+                        } else {
+                          field.onChange(Number(value));
+                        }
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

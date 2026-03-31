@@ -212,9 +212,7 @@ export const usePostres = () => {
       setLoadingState("loading");
       try {
         const data = await getPostres();
-
-        console.log("DATA REAL DEL BACKEND:", {data});
-
+        
         const adaptados: Postre[] = data.map((p: any) => ({
           id: p.id,
           nombre: p.nombre,
@@ -227,7 +225,6 @@ export const usePostres = () => {
           })),
         }));
 
-        console.log("DATA ADAPTADOS DEL BACKEND:", {adaptados});
 
         setPostres(adaptados);
         setLoadingState("success");

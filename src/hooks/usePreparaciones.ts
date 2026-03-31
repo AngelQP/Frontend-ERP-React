@@ -1,60 +1,127 @@
-import type { Preparacion } from "@/features/preparaciones/types/preparacion.type";
-import { preparacionesMock } from "@/mocks/preparacion.mock";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-interface CreatePreparacionDto {
-  postre_id: string;
-  porcionesPlanificadas: number;
-  porcionesReales: number;
-}
+import type { CreatePreparacionRequest, Preparacion, PreparacionApiMeta } from "@/features/preparaciones/types/preparacion.type";
+
+import {
+  getPreparaciones,
+  createPreparacion as createPreparacionApi,
+  anularPreparacion as anularPreparacionApi,
+  getEstadosPreparacion,
+} from "@//api/preparaciones.api";
+import { adaptPreparacionFromApi } from "@/features/preparaciones/adapters/preparacion.adapter";
+import { toast } from "sonner";
+
+
 
 export const usePreparaciones = () => {
-  const [preparaciones, setPreparaciones] =
-    useState<Preparacion[]>(preparacionesMock);
-
+  const [preparaciones, setPreparaciones] = useState<Preparacion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const createPreparacion = async (data: CreatePreparacionDto) => {
-    setIsLoading(true);
+  const [estadosDisponibles, setEstadosDisponibles] = useState<string[]>([]);
 
-    await new Promise((r) => setTimeout(r, 500)); // simula API
+  const [meta, setMeta] = useState<PreparacionApiMeta | null>(null);
+  const [page, setPage] = useState(1);
 
-    const nueva: Preparacion = {
-      id: crypto.randomUUID(),
-      postre_id: data.postre_id,
-      nombrePostre: "Postre Mock",
-      precioVentaReferencia: 10,
-      porcionesPlanificadas: data.porcionesPlanificadas,
-      porcionesReales: data.porcionesReales,
-      porcionesDisponibles: data.porcionesReales,
-      merma: data.porcionesPlanificadas - data.porcionesReales,
-      estado: "ACTIVO",
-      fechaPreparacion: new Date().toISOString(),
-    };
+  const ESTADOS_DEFAULT = [
+    "ACTIVA",
+    "EN VENTA",
+    "FINALIZADA",
+  ];
 
-    setPreparaciones((prev) => [nueva, ...prev]);
+  const fetchEstadosPreparacion = async () => {
+    try {
+      const data = await getEstadosPreparacion();
 
-    setIsLoading(false);
+      const estados = data.map((e) => e.value);
+
+      setEstadosDisponibles(estados);
+
+    } catch (error) {
+      console.error("Error cargando estados de preparación", error);
+    }
   };
 
+  /* ============================
+     LOAD DATA
+  ============================ */
+  const fetchPreparaciones = async (
+    pageNumber = 1,
+    estados: string[]
+  ) => {
+    try {
+      setIsLoading(true);
+
+      const response = await getPreparaciones(estados, pageNumber);
+
+      const mapped = response.data.map(adaptPreparacionFromApi);
+
+      setPreparaciones(mapped);
+
+      setMeta(response.meta);
+      setPage(response.meta.page);
+    } catch (error) {
+      console.error("Error cargando preparaciones", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ============================
+     CREATE
+  ============================ */
+  const createPreparacion = async (data: CreatePreparacionRequest) => {
+    try {
+      setIsLoading(true);
+
+      await createPreparacionApi(data);
+
+      toast.success("Preparación creada correctamente");
+
+      await fetchPreparaciones(1, ESTADOS_DEFAULT);
+    } catch (error) {
+      toast.error("Error al crear la preparación");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  /* ============================
+     ANULAR
+  ============================ */
   const anularPreparacion = async (id: string) => {
-    setIsLoading(true);
+    try {
+      setIsLoading(true);
 
-    await new Promise((r) => setTimeout(r, 400));
+      const response = await anularPreparacionApi(id);
 
-    setPreparaciones((prev) =>
-      prev.map((p) =>
-        p.id === id ? { ...p, estado: "ANULADO" } : p
-      )
-    );
+      await fetchPreparaciones(1, ESTADOS_DEFAULT);
 
-    setIsLoading(false);
+      toast.success(response.message);
+
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || "Error al anular la preparación");
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  /* ============================
+     EFFECT
+  ============================ */
+
+  useEffect(() => {
+    fetchEstadosPreparacion();
+  }, []);
 
   return {
     preparaciones,
     isLoading,
     createPreparacion,
     anularPreparacion,
+    estadosDisponibles,
+    meta,
+    page,
+    fetchPreparaciones,
+    setPage
   };
 };

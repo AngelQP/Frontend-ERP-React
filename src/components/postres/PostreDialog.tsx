@@ -387,11 +387,11 @@ const PostreDialog = ({
               <div className="p-4 bg-muted/50 rounded-lg space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Costo de producción:</span>
-                  <span className="font-medium">${costoCalculado.toFixed(2)}</span>
+                  <span className="font-medium">S/. {costoCalculado.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Precio de venta:</span>
-                  <span className="font-medium">${Number(watchPrecio || 0).toFixed(2)}</span>
+                  <span className="font-medium">S/. {Number(watchPrecio || 0).toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-sm pt-2 border-t">
                   <span className="text-muted-foreground">Margen de ganancia:</span>

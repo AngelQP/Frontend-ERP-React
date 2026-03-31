@@ -25,8 +25,6 @@ const Insumos = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInsumo, setSelectedInsumo] = useState<Insumo | null>(null);
 
-  console.log("rendering insumos page");
-
   // Estado para el modal de movimeintos de insumos
   const [movementDialogOpen, setMovementDialogOpen] = useState(false);
 
