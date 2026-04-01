@@ -2,19 +2,13 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { type LoadingState, type ApiError } from '@/types';
 import { toast } from 'sonner';
 
-import { getUnidadesMedida } from '@/api/insumos.api';
+import { eliminarInsumoApi, getUnidadesMedida } from '@/api/insumos.api';
 import type { UnidadMedida } from '@/features/insumos/types/unidad-medida.types';
 import type { Insumo, InsumoFormData } from '@/features/insumos/types/insumos.type';
 
 import { createInsumoApi, listarInsumosConStock } from '@/api/insumos.api';
 
 import { crearMovimientoApi, type MovimientoPayload } from '@/api/movimiento.api';
-
-
-// Datos iniciales mock (simula API)
-// const initialInsumos: Insumo[] = [
-//   { id: '1', nombre: 'Harina', unidad_medida: 'kg', costo_unitario: 25, cantidad_disponible: 10 },
-// ];
 
 const STOCK_BAJO_UMBRAL = 5;
 
@@ -28,13 +22,26 @@ export const useInsumos = () => {
   const [loadingUnidades, setLoadingUnidades] = useState(false);
   const [errorUnidades, setErrorUnidades] = useState<string | null>(null);
 
-  const fetchInsumos = useCallback(async () => {
+  // Manejo de paginacion
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: 10,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPrevPage: false,
+  });
+
+  const fetchInsumos = useCallback(async (page=1, limit=4) => {
     setLoadingState("loading");
     setError(null);
 
     try {
-      const data = await listarInsumosConStock();
-      setInsumos(data);
+      const response = await listarInsumosConStock(page, limit);
+      setInsumos(response.data);
+      setMeta(response.meta);
       setLoadingState("success");
     } catch (err) {
       setError({ code: "FETCH_ERROR", message: "Error al cargar insumos" });
@@ -42,6 +49,24 @@ export const useInsumos = () => {
       toast.error("Error al cargar insumos");
     }
   }, []);
+
+  const nextPage = () => {
+    if (meta.hasNextPage) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (meta.hasPrevPage) {
+      setPage(prev => prev - 1);
+    }
+  };
+
+  const goToPage = (newPage: number) => {
+    if (newPage >= 1 && newPage <= meta.totalPages) {
+      setPage(newPage);
+    }
+  };
 
   useEffect(() => {
     fetchInsumos();
@@ -85,13 +110,13 @@ export const useInsumos = () => {
     
     try {
 
-      const nuevoInsumo = await createInsumoApi(data);
+      await createInsumoApi(data);
 
       // Agregamos a la lista solo después de que el servidor confirma
-      setInsumos(prev => [...prev, nuevoInsumo]);
+      await fetchInsumos();
+
       setLoadingState('success');
       toast.success('Insumo creado correctamente');
-      return nuevoInsumo;
 
     } catch (err) {
       const apiError = err as ApiError;
@@ -131,8 +156,9 @@ export const useInsumos = () => {
     setError(null);
     
     try {
-      await simulateApi();
-      setInsumos(prev => prev.filter(i => i.id !== id));
+      // await simulateApi();
+      await eliminarInsumoApi(id);
+      await fetchInsumos();
       setLoadingState('success');
       toast.success('Insumo eliminado correctamente');
     } catch (err) {
@@ -235,5 +261,14 @@ export const useInsumos = () => {
     unidadesMedida,
     loadingUnidades,
     errorUnidades,
+
+    // 👇 Paginación
+    meta,
+    page,
+    limit,
+    nextPage,
+    prevPage,
+    goToPage,
+    fetchInsumos,
   };
 };

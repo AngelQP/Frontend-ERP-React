@@ -30,3 +30,15 @@ export interface InsumoRequestUpdate {
     nombre: string;
     unidad: string;
 }
+
+export interface InsumosPaginadosResponse {
+  data: Insumo[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+    hasNextPage: boolean;
+    hasPrevPage: boolean;
+  };
+}

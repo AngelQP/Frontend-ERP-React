@@ -1,6 +1,7 @@
 import AppLayout from "@/components/AppLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+
 import {
   Table,
   TableBody,
@@ -42,7 +43,15 @@ const Insumos = () => {
     // 👇 unidades de medida
     unidadesMedida,
     loadingUnidades,
-    // errorUnidades,
+
+    // 👇 paginación
+    meta,
+    page,
+    goToPage,
+    // nextPage,
+    // prevPage,
+    fetchInsumos
+
   } = useInsumos();
 
   const isLoading = loadingState === "loading";
@@ -95,17 +104,19 @@ const Insumos = () => {
         <div>
           <p className="text-sm text-muted-foreground">Valor total del inventario</p>
           <p className="text-2xl font-bold text-foreground">
-            S/. {valorTotalInventario.toLocaleString("es-MX", { minimumFractionDigits: 2 })}
+            S/. {valorTotalInventario.toLocaleString("es-PE", { minimumFractionDigits: 2 })}
           </p>
         </div>
         <div className="text-right">
           <p className="text-sm text-muted-foreground">Total de insumos</p>
-          <p className="text-2xl font-bold text-foreground">{insumos.length}</p>
+          <p className="text-2xl font-bold text-foreground">{meta?.total ?? 0}</p>
         </div>
       </div>
 
       {/* Header Actions */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
+        
+        {/* Search */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
@@ -134,85 +145,120 @@ const Insumos = () => {
           </Button>
 
         </div>
-        {/* <Button className="gap-2" onClick={handleOpenCreate}>
-          <Plus className="w-4 h-4" />
-          Nuevo insumo
-        </Button> */}
 
       </div>
 
-      {/* Table */}
-      <div className="card-elevated overflow-hidden">
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-muted/50">
-              <TableHead>Insumo</TableHead>
-              <TableHead>Unidad</TableHead>
-              <TableHead className="text-right">Costo/Unidad</TableHead>
-              <TableHead className="text-right">Stock</TableHead>
-              {/* <TableHead className="text-right">Valor total</TableHead> */}
-              <TableHead className="w-24"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredIngredients.map((item) => (
-              <TableRow key={item.id} className="hover:bg-muted/30 transition-colors">
-                <TableCell>
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
-                      <Package className="w-4 h-4 text-primary" />
-                    </div>
-                    <span className="font-medium">{item.nombre}</span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-muted-foreground">
-                  {item.unidad_medida.toUpperCase()}
-                </TableCell>
-                <TableCell className="text-right">
-                  S/. {item.costo_unitario.toFixed(2)}
-                </TableCell>
-                <TableCell className="text-right">
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      item.cantidad_disponible <= STOCK_BAJO_UMBRAL
-                        ? "bg-warning-light text-warning"
-                        : "bg-success-light text-success"
-                    }`}
-                  >
-                    {item.cantidad_disponible} {item.unidad_medida}
-                  </span>
-                </TableCell>
-                {/* !TODO: Fila de valor total */}
-                {/* <TableCell className="text-right font-medium">
-                  ${(item.costo_unitario * item.cantidad_disponible).toFixed(2)}
-                </TableCell> */}
-                <TableCell>
-                  <div className="flex justify-end gap-3">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8"
-                      onClick={() => handleOpenEdit(item)}
-                      disabled={isLoading}
-                    >
-                      <Edit2 className="w-4 h-4 text-muted-foreground" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 hover:text-destructive"
-                      onClick={() => handleOpenDelete(item)}
-                      disabled={isLoading}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+      {/* <div className="flex flex-col"> */}
+
+        {/* Table */}
+        <div className="card-elevated overflow-hidden flex-1">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-muted/50">
+                <TableHead>Insumo</TableHead>
+                <TableHead>Unidad</TableHead>
+                <TableHead className="text-right">Costo/Unidad</TableHead>
+                <TableHead className="text-right">Stock</TableHead>
+                {/* <TableHead className="text-right">Valor total</TableHead> */}
+                <TableHead className="w-24"></TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody className="">
+              {filteredIngredients.map((item) => (
+                <TableRow key={item.id} className="hover:bg-muted/30 transition-colors">
+                  <TableCell>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
+                        <Package className="w-4 h-4 text-primary" />
+                      </div>
+                      <span className="font-medium">{item.nombre}</span>
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
+                    {item.unidad_medida.toUpperCase()}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    S/. {item.costo_unitario.toFixed(2)}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <span
+                      className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        item.cantidad_disponible <= STOCK_BAJO_UMBRAL
+                          ? "bg-warning-light text-warning"
+                          : "bg-success-light text-success"
+                      }`}
+                    >
+                      {item.cantidad_disponible} {item.unidad_medida}
+                    </span>
+                  </TableCell>
+                  {/* !TODO: Fila de valor total */}
+                  {/* <TableCell className="text-right font-medium">
+                    ${(item.costo_unitario * item.cantidad_disponible).toFixed(2)}
+                  </TableCell> */}
+                  <TableCell>
+                    <div className="flex justify-end gap-3">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => handleOpenEdit(item)}
+                        disabled={isLoading}
+                      >
+                        <Edit2 className="w-4 h-4 text-muted-foreground" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 hover:text-destructive"
+                        onClick={() => handleOpenDelete(item)}
+                        disabled={isLoading}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+
+        {/* PAGINACIÓN */}
+        {meta && meta.totalPages > 1 && (
+            <div className="flex justify-center items-center gap-4 pt-6 mt-auto">
+
+              <Button
+                variant="outline"
+                disabled={!meta.hasPrevPage}
+                onClick={ () => {
+                  const prev = page - 1;
+                  goToPage(prev);
+                  fetchInsumos(prev);
+                }}
+              >
+                Anterior
+              </Button>
+
+              <span className="text-sm text-muted-foreground">
+                Página {page} de {meta.totalPages}
+              </span>
+
+              <Button
+                variant="outline"
+                disabled={!meta.hasNextPage}
+                onClick={() => {
+                  const next = page + 1;
+                  goToPage(next);
+                  fetchInsumos(next);
+                }}
+              >
+                Siguiente
+              </Button>
+
+            </div>
+        )}
+
+      {/* </div> */}
 
       {/* Empty State */}
       {filteredIngredients.length === 0 && (

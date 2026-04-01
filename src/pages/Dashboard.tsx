@@ -51,7 +51,7 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <StatCard
           title="Ingresos del mes"
-          value="$6,200"
+          value="S/. 6,200"
           change="+12% vs mes anterior"
           changeType="positive"
           icon={DollarSign}
@@ -59,7 +59,7 @@ const Dashboard = () => {
         />
         <StatCard
           title="Gastos del mes"
-          value="$3,100"
+          value="s/. 3,100"
           change="+3% vs mes anterior"
           changeType="negative"
           icon={TrendingDown}
@@ -67,7 +67,7 @@ const Dashboard = () => {
         />
         <StatCard
           title="Balance"
-          value="$3,100"
+          value="S/. 3,100"
           change="Utilidad neta"
           changeType="positive"
           icon={TrendingUp}
@@ -198,7 +198,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-                <p className="text-sm font-semibold text-foreground">${sale.total}</p>
+                <p className="text-sm font-semibold text-foreground">S/. {sale.total}</p>
               </div>
             ))}
           </div>

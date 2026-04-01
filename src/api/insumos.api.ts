@@ -1,25 +1,28 @@
 
 import { apiPrivate } from "@/lib/axios";
-import type { Insumo, InsumoCreateResponse, InsumoFormData } from "@/features/insumos/types/insumos.type";
+import type { Insumo, InsumoCreateResponse, InsumoFormData, InsumosPaginadosResponse } from "@/features/insumos/types/insumos.type";
 import type { UnidadMedida } from "@/features/insumos/types/unidad-medida.types";
 
+export const listarInsumosConStock = async (
+  page: number = 1,
+  limit: number = 4
+): Promise<InsumosPaginadosResponse> => {
 
-export const listarInsumosConStock = async (): Promise<Insumo[]> => {
-    const { data } = await apiPrivate.get<Insumo[]>("/inventario-insumos");
+  const { data } = await apiPrivate.get("/inventario-insumos", {
+    params: { page, limit }
+  });
 
-    // console.log(data);
-
-    // Se mapea los campos del backend al frontend
-    return data.map((item: any) => ({
-        id: item.insumo_id,
-        nombre: item.nombre,
-        unidad_medida: item.unidad,
-        cantidad_disponible: item.stockActual ?? 0,
-        costo_unitario: item.costoUnitario ?? 0,
-    }))
-
-    // return data;
-}
+  return {
+    data: data.data.map((item: any) => ({
+      id: item.insumo_id,
+      nombre: item.nombre,
+      unidad_medida: item.unidad,
+      cantidad_disponible: item.stockActual ?? 0,
+      costo_unitario: item.costoUnitario ?? 0,
+    })),
+    meta: data.meta
+  };
+};
 
 export const createInsumoApi= async (payload: InsumoFormData ): Promise<Insumo> => {
 
@@ -44,3 +47,7 @@ export const getUnidadesMedida = async(): Promise<UnidadMedida[]> => {
     return data;
 }
 
+export const eliminarInsumoApi = async (id: string): Promise<void> => {
+    const {data} = await apiPrivate.delete(`/insumos/${id}`);
+    return data;
+}

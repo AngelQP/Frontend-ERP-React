@@ -1,73 +1,354 @@
-# React + TypeScript + Vite
+# 🍰 Dulce Control - ERP Postres
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Sistema ERP desarrollado para la gestión integral de una empresa de postres, permitiendo controlar la producción, ventas e inventario mediante el manejo de insumos por lotes y la aplicación de la regla de negocio **FIFO** para una administración eficiente del stock.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+# 📌 Descripción
 
-## React Compiler
+**Dulce Control** es un sistema ERP enfocado en la gestión de negocios de postres, diseñado para controlar todo el flujo operativo desde el ingreso de insumos hasta la venta final del producto.
 
-The React Compiler is currently not compatible with SWC. See [this issue](https://github.com/vitejs/vite-plugin-react/issues/428) for tracking the progress.
+El sistema permite:
 
-## Expanding the ESLint configuration
+* gestionar usuarios y roles
+* controlar insumos por lotes
+* aplicar FIFO en inventario
+* registrar preparaciones
+* realizar ventas
+* monitorear el stock
+* visualizar reportes
+* administrar el negocio desde un dashboard central
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Todo el sistema está construido con una arquitectura moderna basada en **NestJS + React + PostgreSQL**.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+# 🧠 Regla de negocio principal
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+El sistema trabaja con **FIFO (First In, First Out)** para el control del inventario.
+
+Esto significa que:
+
+> el primer insumo que entra es el primero que se utiliza en las preparaciones y ventas.
+
+Beneficios:
+
+* control real del stock
+* reducción de pérdidas
+* trazabilidad por lotes
+* gestión eficiente de inventario
+* mejor control de producción
+
+---
+
+# 🛠️ Tecnologías utilizadas
+
+## Backend
+
+* NestJS
+* PostgreSQL
+* TypeORM
+* JWT
+* REST API
+* Arquitectura modular
+
+---
+
+## Frontend
+
+* React
+* Vite
+* TypeScript
+* TailwindCSS
+* Shadcn UI
+* Axios
+* Zod
+* React Hook Form
+
+---
+
+# 🧩 Módulos del sistema
+
+El ERP cuenta con los siguientes módulos:
+
+### 🔐 Autenticación
+
+* login
+* protección de rutas
+* JWT
+* control de sesiones
+
+---
+
+### 👥 Usuarios
+
+* gestión de usuarios
+* roles
+* permisos
+* administración del sistema
+
+---
+
+### 📦 Insumos
+
+* ingreso de insumos por lotes
+* control de stock
+* fechas de ingreso
+* trazabilidad
+
+---
+
+### 🍮 Preparaciones
+
+* creación de preparaciones
+* consumo automático de insumos
+* aplicación de FIFO
+* control de producción
+
+---
+
+### 💰 Ventas
+
+* registro de ventas
+* selección de preparaciones
+* control de estados
+* historial
+
+---
+
+### 📊 Inventario
+
+* stock en tiempo real
+* control de lotes
+* consumo por FIFO
+
+---
+
+### 📈 Reportes
+
+* reportes operativos
+* control de movimientos
+* análisis de datos
+
+---
+
+### 🧭 Dashboard
+
+* resumen general del sistema
+* métricas
+* indicadores
+
+---
+
+### 🛡️ Roles y permisos
+
+* control de accesos
+* seguridad del sistema
+
+---
+
+# 📸 Capturas del sistema
+
+## 📋 Index
+
+![Index](./public/screen/index.png)
+
+---
+
+## 🔐 Login
+
+![Login](./public/screen/login.png)
+
+---
+
+## 🧭 Dashboard
+
+![Dashboard](./public/screen/dashboard.png)
+
+---
+
+
+## 🍰 Insumos
+
+![Insumos](./public/screen/insumos.png)
+
+---
+
+## 📦 Postres
+
+![Postres](./public/screen/postres.png)
+
+---
+
+## 🍮 Preparaciones
+
+![Preparaciones](./public/screen/preparaciones.png)
+
+---
+
+## 💰 Ventas
+
+![Ventas](./public/screen/ventas.png)
+
+---
+
+## 🔍 Filtros
+
+![Filtros](./public/screen/filtros.png)
+
+---
+
+## 📄 Paginación
+
+![Paginacion](./public/screen/paginacion.png)
+
+---
+
+## 🧾 Dialog Venta
+
+![Dialog Venta](./public/screen/dialog-venta.png)
+
+---
+
+## 🧾 Dialog Preparación
+
+![Dialog Preparacion](./public/screen/dialog-preparacion.png)
+
+---
+
+## 🧾 Dialog Postre
+
+![Dialog Postre](./public/screen/dialog-postre.png)
+
+---
+
+# ⚙️ Instalación del proyecto
+
+## 1️⃣ Clonar repositorio
+
+```bash
+git clone https://github.com/AngelQP/Frontend-ERP-React.git
+
+git clone https://github.com/AngelQP/Backend-ERP-NestJS.git
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+# 🧩 Backend
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### instalar dependencias
+
+```bash
+npm install
 ```
+
+### ejecutar
+
+```bash
+nest start -w
+```
+
+---
+
+# 🎨 Frontend
+
+### ingresar a la carpeta
+
+### instalar dependencias
+
+```bash
+yarn
+```
+
+### ejecutar
+
+```bash
+yarn dev
+```
+
+---
+
+# 🗄️ Variables de entorno
+
+El sistema se configura mediante un archivo **.env**
+
+## Backend
+
+```
+DB_HOST=
+DB_PORT=
+DB_USER=
+DB_PASS=
+DB_NAME=
+JWT_SECRET=
+```
+
+---
+
+# 🔌 API
+
+El backend trabaja con una API REST construida en NestJS.
+
+Principales endpoints:
+
+* auth
+* users
+* insumos
+* preparaciones
+* ventas
+* inventario
+* reportes
+
+---
+
+# 🏗️ Arquitectura
+
+El sistema sigue una arquitectura modular:
+
+```
+backend
+ ├── auth
+ ├── users
+ ├── insumos
+ ├── preparaciones
+ ├── ventas
+ ├── inventario
+ └── reportes
+
+frontend
+ ├── components
+ ├── features
+ ├── pages
+ ├── services
+ └── hooks
+```
+
+---
+
+# 🚀 Estado del proyecto
+
+Sistema en desarrollo activo.
+
+Incluye:
+
+* arquitectura ERP
+* control FIFO
+* gestión de producción
+* ventas
+* inventario
+* dashboard
+* seguridad con JWT
+
+---
+
+# 👨‍💻 Autor
+
+Desarrollado por **Angel**
+
+Backend Developer apasionado por la construcción de sistemas escalables y arquitecturas limpias.
+
+---
+
+# 📄 Licencia
+
+Proyecto de uso educativo y profesional.
