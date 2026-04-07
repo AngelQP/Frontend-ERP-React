@@ -220,7 +220,8 @@ const Ventas = () => {
         </Button>
       </div>
       
-      <div className="flex flex-col">            
+      <div className="flex flex-col h-full">   
+
         {/* Table */}
         <div className="card-elevated overflow-hidden">
           <Table>
@@ -341,10 +342,12 @@ const Ventas = () => {
           </Table>
         </div>
 
+        <div className="flex-1"></div>
+
         {/* PAGINACIÓN */}
         {ventasMeta && ventasMeta.totalPages > 1 && (
 
-          <div className="mt-10 pt-6 flex justify-center items-center gap-4">
+          <div className="mt-10 pt-6 flex justify-center items-center gap-4 border-t">
 
             <Button
               variant="outline"
@@ -369,6 +372,7 @@ const Ventas = () => {
           </div>
 
         )}
+
       </div>
 
       {/* Empty State */}

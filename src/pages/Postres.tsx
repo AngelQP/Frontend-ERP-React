@@ -24,6 +24,12 @@ const Postres = () => {
     eliminarPostre,
     calcularCostoReceta,
     obtenerInsumo,
+
+    // paginacion
+    meta,
+    page,
+    goToPage,
+    fetchPostres,
   } = usePostres();
 
   const isLoading = loadingState === "loading";
@@ -69,6 +75,8 @@ const Postres = () => {
   return (
     <AppLayout title="Postres" subtitle="Gestiona tu catálogo">
       {/* Header Actions */}
+      <div className="flex flex-col h-full">
+
       <div className="flex flex-col sm:flex-row gap-4 justify-between mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -171,24 +179,65 @@ const Postres = () => {
 
       {/* Empty State */}
       {filteredDesserts.length === 0 && (
-        <div className="text-center py-12">
-          <Cake className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-foreground mb-2">
-            {searchTerm ? "No se encontraron resultados" : "No hay postres"}
-          </h3>
-          <p className="text-muted-foreground mb-4">
-            {searchTerm
-              ? "Intenta con otro término de búsqueda"
-              : "Agrega tu primer postre para comenzar"}
-          </p>
-          {!searchTerm && (
-            <Button className="gap-2" onClick={handleOpenCreate}>
-              <Plus className="w-4 h-4" />
-              Nuevo postre
-            </Button>
-          )}
-        </div>
+      <div className="text-center py-12">
+        <Cake className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-foreground mb-2">
+          {searchTerm ? "No se encontraron resultados" : "No hay postres"}
+        </h3>
+        <p className="text-muted-foreground mb-4">
+          {searchTerm
+            ? "Intenta con otro término de búsqueda"
+            : "Agrega tu primer postre para comenzar"}
+        </p>
+        {!searchTerm && (
+          <Button className="gap-2" onClick={handleOpenCreate}>
+            <Plus className="w-4 h-4" />
+            Nuevo postre
+          </Button>
+        )}
+      </div>
       )}
+
+      <div className="flex-1"></div>
+
+      {/* Paginacion */}
+      {meta && meta.totalPages > 1 && (
+
+        <div className="bg-background flex justify-center items-center gap-4 pt-6 border-t border-border mt-auto">
+
+          <Button
+            variant="outline"
+            disabled={!meta.hasPrevPage}
+            onClick={() => {
+              const prev = page - 1;
+              goToPage(prev);
+              fetchPostres(prev);
+            }}
+          >
+            Anterior
+          </Button>
+
+          <span className="text-sm text-muted-foreground">
+            Página {page} de {meta.totalPages}
+          </span>
+
+          <Button
+            variant="outline"
+            disabled={!meta.hasNextPage}
+            onClick={() => {
+              const next = page + 1;
+              goToPage(next);
+              fetchPostres(next);
+            }}
+          >
+            Siguiente
+          </Button>
+
+        </div>
+        
+      )}
+
+      </div>
 
       {/* Dialogs */}
       <PostreDialog

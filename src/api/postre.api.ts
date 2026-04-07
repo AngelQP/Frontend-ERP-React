@@ -1,5 +1,5 @@
 import type { Postre, PostreFormData } from "@/features/postres/types/postre.types";
-import type { PostreApiResponse } from "@/features/postres/types/postre.api.types";
+import type { PostreApiResponse, PostreListApiResponse, PostrePaginationMeta  } from "@/features/postres/types/postre.api.types";
 import { adaptPostreFromApi } from "@/features/postres/adapters/postre.adapter";
 import { apiPrivate } from "@/lib/axios";
 
@@ -57,12 +57,29 @@ export const deletePostre = async (id: string): Promise<void> => {
 /* ============================
    FIND ALL
 ============================ */
-export const getPostres = async (): Promise<Postre[]> => {
-    const { data } = await apiPrivate.get<PostreApiResponse[]>("/postres");
+// export const getPostres = async (): Promise<Postre[]> => {
+//     const { data } = await apiPrivate.get<PostreApiResponse[]>("/postres");
 
-    const mapped = data.map(adaptPostreFromApi);
+//     const mapped = data.map(adaptPostreFromApi);
 
-    // console.log("DATA MAPEADA DEL BACKEND:", { mapped });
+//     // console.log("DATA MAPEADA DEL BACKEND:", { mapped });
 
-    return mapped;
+//     return mapped;
+// };
+export const getPostres = async (
+    page: number = 1,
+    limit: number = 6
+  ): Promise<{
+    postres: Postre[];
+    meta: PostrePaginationMeta;
+  }> => {
+
+    const { data } = await apiPrivate.get<PostreListApiResponse>(
+      `/postres?page=${page}&limit=${limit}`
+    );
+
+    return {
+      postres: data.data.map(adaptPostreFromApi),
+      meta: data.meta,
+    };
 };

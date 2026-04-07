@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { type  LoadingState,  type ApiError, BUSINESS_ERRORS } from '@/types';
 import { toast } from 'sonner';
 import { useInsumos } from './useInsumos';
+import type { PostrePaginationMeta } from "@/features/postres/types/postre.api.types";
 
 import {
   createPostre,
@@ -67,6 +68,10 @@ export const usePostres = () => {
   const [error, setError] = useState<ApiError | null>(null);
   const { insumos, obtenerInsumo } = useInsumos();
 
+  const [page, setPage] = useState(1);
+  const [limit] = useState(6);
+  const [meta, setMeta] = useState<PostrePaginationMeta | null>(null);
+
   // Simula delay de API
   // const simulateApi = () => new Promise(resolve => setTimeout(resolve, 300));
 
@@ -126,21 +131,23 @@ export const usePostres = () => {
     setError(null);
 
     try {
-      const nuevo = await createPostre(data);
+      await createPostre(data)
+      // const nuevo = await createPostre(data);
 
-      const postreAdaptado: Postre = {
-        id: nuevo.id,
-        nombre: nuevo.nombre,
-        descripcion: nuevo.descripcion,
-        precio_referencia: Number(nuevo.precio_referencia),
-        rendimiento_base: Number(nuevo.rendimiento_base),
-        receta: nuevo.receta.map((r: any) => ({
-          insumo_id: r.insumo_id,  // ✅
-          cantidad: Number(r.cantidad),
-        })),
-      };
+      // const postreAdaptado: Postre = {
+      //   id: nuevo.id,
+      //   nombre: nuevo.nombre,
+      //   descripcion: nuevo.descripcion,
+      //   precio_referencia: Number(nuevo.precio_referencia),
+      //   rendimiento_base: Number(nuevo.rendimiento_base),
+      //   receta: nuevo.receta.map((r: any) => ({
+      //     insumo_id: r.insumo_id,  // ✅
+      //     cantidad: Number(r.cantidad),
+      //   })),
+      // };
 
-      setPostres((prev) => [...prev, postreAdaptado]);
+      // setPostres((prev) => [...prev, postreAdaptado]);
+      await fetchPostres(page);
 
       setLoadingState("success");
       toast.success("Postre creado correctamente");
@@ -158,23 +165,26 @@ export const usePostres = () => {
       setError(null);
 
       try {
-        const actualizado = await updatePostre(id, data);
+        await updatePostre(id, data)
+        // const actualizado = await updatePostre(id, data);
 
-        const postreAdaptado: Postre = {
-          id: actualizado.id,
-          nombre: actualizado.nombre,
-          descripcion: actualizado.descripcion,
-          precio_referencia: Number(actualizado.precio_referencia),
-          rendimiento_base: Number(actualizado.rendimiento_base),
-          receta: actualizado.receta.map((r: any) => ({
-            insumo_id: r.insumo_id, 
-            cantidad: Number(r.cantidad),
-          })),
-        };
+        // const postreAdaptado: Postre = {
+        //   id: actualizado.id,
+        //   nombre: actualizado.nombre,
+        //   descripcion: actualizado.descripcion,
+        //   precio_referencia: Number(actualizado.precio_referencia),
+        //   rendimiento_base: Number(actualizado.rendimiento_base),
+        //   receta: actualizado.receta.map((r: any) => ({
+        //     insumo_id: r.insumo_id, 
+        //     cantidad: Number(r.cantidad),
+        //   })),
+        // };
 
-        setPostres((prev) =>
-          prev.map((p) => (p.id === id ? postreAdaptado : p))
-        );
+        // setPostres((prev) =>
+        //   prev.map((p) => (p.id === id ? postreAdaptado : p))
+        // );
+
+        await fetchPostres(page);
 
         setLoadingState("success");
         toast.success("Postre actualizado correctamente");
@@ -195,7 +205,9 @@ export const usePostres = () => {
     try {
       await deletePostre(id);
 
-      setPostres((prev) => prev.filter((p) => p.id !== id));
+      // setPostres((prev) => prev.filter((p) => p.id !== id));
+
+      await fetchPostres(page);
 
       setLoadingState("success");
       toast.success("Postre eliminado correctamente");
@@ -207,41 +219,80 @@ export const usePostres = () => {
   }, []);
 
   // Obtener todos los postres
-  useEffect(() => {
-    const fetchPostres = async () => {
-      setLoadingState("loading");
-      try {
-        const data = await getPostres();
+  // useEffect(() => {
+  //   const fetchPostres = async () => {
+  //     setLoadingState("loading");
+  //     try {
+  //       const data = await getPostres();
         
-        const adaptados: Postre[] = data.map((p: any) => ({
-          id: p.id,
-          nombre: p.nombre,
-          descripcion: p.descripcion,
-          precio_referencia: Number(p.precio_referencia),
-          rendimiento_base: Number(p.rendimiento_base),
-          receta: p.receta.map((r: any) => ({
-            insumo_id: r.insumo_id, 
-            cantidad: Number(r.cantidad),
-          })),
-        }));
+  //       const adaptados: Postre[] = data.map((p: any) => ({
+  //         id: p.id,
+  //         nombre: p.nombre,
+  //         descripcion: p.descripcion,
+  //         precio_referencia: Number(p.precio_referencia),
+  //         rendimiento_base: Number(p.rendimiento_base),
+  //         receta: p.receta.map((r: any) => ({
+  //           insumo_id: r.insumo_id, 
+  //           cantidad: Number(r.cantidad),
+  //         })),
+  //       }));
 
 
-        setPostres(adaptados);
-        setLoadingState("success");
-      } catch (err) {
-        setLoadingState("error");
-        toast.error("Error al cargar postres");
-      }
-    };
+  //       setPostres(adaptados);
+  //       setLoadingState("success");
+  //     } catch (err) {
+  //       setLoadingState("error");
+  //       toast.error("Error al cargar postres");
+  //     }
+  //   };
 
-    fetchPostres();
-  }, []);
+  //   fetchPostres();
+  // }, []);
+
+  const fetchPostres = useCallback(async (currentPage: number) => {
+    setLoadingState("loading");
+
+    try {
+      const response = await getPostres(currentPage, limit);
+
+      setPostres(response.postres);
+      setMeta(response.meta);
+
+      setLoadingState("success");
+    } catch (err) {
+      setLoadingState("error");
+      toast.error("Error al cargar postres");
+    }
+  }, [limit]);
+
+  useEffect(() => {
+    fetchPostres(page);
+  }, [page, fetchPostres]);  
 
   // Obtener postre por ID
   const obtenerPostre = useCallback((id: string) => 
     postres.find(p => p.id === id),
     [postres]
   );
+
+  // funciones de paginacion
+  const nextPage = () => {
+    if (meta?.hasNextPage) {
+      setPage((prev) => prev + 1);
+    }
+  };
+
+  const prevPage = () => {
+    if (meta?.hasPrevPage) {
+      setPage((prev) => prev - 1);
+    }
+  };
+
+  const goToPage = (newPage: number) => {
+    if (meta && newPage >= 1 && newPage <= meta.totalPages) {
+      setPage(newPage);
+    }
+  };
 
   return {
     postres,
@@ -256,5 +307,13 @@ export const usePostres = () => {
     calcularCostoReceta,
     validarReceta,
     obtenerInsumo,
+
+    page,
+    limit,
+    meta,
+    nextPage,
+    prevPage,
+    goToPage,
+    fetchPostres,
   };
 };

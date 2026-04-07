@@ -52,7 +52,7 @@ export const getPreparaciones = async (
 
   const params = new URLSearchParams();
 
-  const limit = 6;
+  const limit = 7;
 
   estados.forEach((e) => params.append("estado", e));
 
