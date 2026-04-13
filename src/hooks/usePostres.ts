@@ -72,8 +72,6 @@ export const usePostres = () => {
   const [limit] = useState(6);
   const [meta, setMeta] = useState<PostrePaginationMeta | null>(null);
 
-  // Simula delay de API
-  // const simulateApi = () => new Promise(resolve => setTimeout(resolve, 300));
 
   // Calcular costo de una receta
   const calcularCostoReceta = useCallback((receta: RecetaItem[]): number => {
@@ -90,9 +88,23 @@ export const usePostres = () => {
   const postresConCosto = useMemo((): PostreConCosto[] => {
     return postres.map(postre => {
       const costo_total = calcularCostoReceta(postre.receta);
-      const margen = postre.precio_referencia > 0 
-        ? ((postre.precio_referencia - costo_total) / postre.precio_referencia) * 100 
-        : 0;
+
+      // costo por unidad
+      const costo_unitario =
+        postre.rendimiento_base > 0
+          ? costo_total / postre.rendimiento_base
+          : 0;
+
+      // margen por unidad
+      const margen =
+        postre.precio_referencia > 0
+          ? ((postre.precio_referencia - costo_unitario) /
+              postre.precio_referencia) *
+            100
+          : 0;
+      // const margen = postre.precio_referencia > 0 
+      //   ? ((postre.precio_referencia - costo_total) / postre.precio_referencia) * 100 
+      //   : 0;
       
       return {
         ...postre,

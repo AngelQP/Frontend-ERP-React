@@ -71,12 +71,28 @@
         navigate("/dashboard");
 
       }catch (error: any) {
+
+        console.log(error.response?.data);
         
-        // manejo de errores
+        const message = error.response?.data?.message;
 
-        console.log(error)
+        // CASO: EMAIL NO VERIFICADO
+        if (message?.includes("verificar")) {
 
-        if( error.response?.status === 401 ){
+          toast({
+            title: "Verifica tu correo",
+            description: "Debes verificar tu cuenta antes de iniciar sesión",
+            variant: "destructive",
+          });
+
+          // REDIRECCIÓN CON EMAIL
+          navigate("/verify-pending", { state: { email } });
+
+          return;
+        }
+
+        // CREDENCIALES
+        if (error.response?.status === 401) {
           toast({
             title: "Credenciales incorrectas",
             description: "Verifica tu correo o contraseña",
@@ -88,7 +104,7 @@
             description: "Inténtalo nuevamente más tarde",
             variant: "destructive",
           });
-        }     
+        }   
 
       } finally {
         setIsLoading(false);
@@ -148,6 +164,14 @@
                   />
                 </div>
                 {errors.password && <p className="text-xs text-destructive animate-fade-in">{errors.password}</p>}
+              </div>
+              <div className="flex justify-end">
+                <Link
+                  to="/forgot-password"
+                  className="text-sm text-primary hover:underline transition-colors"
+                >
+                  ¿Olvidaste tu contraseña?
+                </Link>
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={isLoading}>

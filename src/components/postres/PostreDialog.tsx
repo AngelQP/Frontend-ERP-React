@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useEffect, useMemo } from "react";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
@@ -83,7 +83,6 @@ const PostreDialog = ({
   obtenerInsumo,
 }: PostreDialogProps) => {
   const isEditing = !!postre;
-  const [costoCalculado, setCostoCalculado] = useState(0);
 
   const form = useForm<PostreFormValues>({
     resolver: zodResolver(postreSchema),
@@ -101,21 +100,33 @@ const PostreDialog = ({
     name: "receta",
   });
 
-  const watchReceta = form.watch("receta");
-  const watchPrecio = form.watch("precio_referencia");
+  const watchReceta = useWatch({
+    control: form.control,
+    name: "receta",
+  });
 
-  // Recalcular costo cuando cambia la receta
-  useEffect(() => {
-    if (watchReceta && watchReceta.length > 0) {
-      const validReceta = watchReceta
-        .filter((r): r is { insumo_id: string; cantidad: number } => 
-          !!r.insumo_id && r.cantidad > 0
-        );
-      const costo = calcularCosto(validReceta);
-      setCostoCalculado(costo);
-    } else {
-      setCostoCalculado(0);
-    }
+  const watchPrecio = useWatch({
+    control: form.control,
+    name: "precio_referencia",
+  });
+
+  const watchRendimiento = useWatch({
+    control: form.control,
+    name: "rendimiento_base",
+  });
+
+  // Recalcular costo cuando cambia la receta o el precio o rendimiento
+  const costoCalculado = useMemo(() => {
+
+    if (!watchReceta || watchReceta.length === 0) return 0;
+
+    const validReceta = watchReceta.filter(
+      (r): r is { insumo_id: string; cantidad: number } =>
+        !!r?.insumo_id && Number(r?.cantidad) > 0
+    );
+
+    return calcularCosto(validReceta);
+
   }, [watchReceta, calcularCosto]);
 
   // Reset form when dialog opens
@@ -162,9 +173,15 @@ const PostreDialog = ({
     return insumos.filter(i => !usedIds.includes(i.id));
   };
 
-  const margen = watchPrecio > 0 && costoCalculado > 0
-    ? ((watchPrecio - costoCalculado) / watchPrecio) * 100
-    : 0;
+  const costoUnitario =
+    watchRendimiento > 0
+      ? costoCalculado / watchRendimiento
+      : 0;
+
+  const margen =
+    watchPrecio > 0
+      ? ((watchPrecio - costoUnitario) / watchPrecio) * 100
+      : 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -221,7 +238,7 @@ const PostreDialog = ({
                 name="precio_referencia"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Precio de referencia ($)</FormLabel>
+                    <FormLabel>Precio de venta por unidad (S/.)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -385,20 +402,42 @@ const PostreDialog = ({
             {/* Cost Summary */}
             {fields.length > 0 && (
               <div className="p-4 bg-muted/50 rounded-lg space-y-2">
+
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Costo de producción:</span>
+                  <span className="text-muted-foreground">Costo del lote:</span>
                   <span className="font-medium">S/. {costoCalculado.toFixed(2)}</span>
                 </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Porciones:</span>
+                  <span className="font-medium">{watchRendimiento}</span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Costo por unidad:</span>
+                  <span className="font-medium">
+                    S/. {costoUnitario.toFixed(2)}
+                  </span>
+                </div>
+
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Precio de venta:</span>
-                  <span className="font-medium">S/. {Number(watchPrecio || 0).toFixed(2)}</span>
+                  <span className="font-medium">
+                    S/. {Number(watchPrecio || 0).toFixed(2)}
+                  </span>
                 </div>
+
                 <div className="flex justify-between text-sm pt-2 border-t">
                   <span className="text-muted-foreground">Margen de ganancia:</span>
-                  <span className={`font-bold ${margen > 0 ? "text-success" : "text-destructive"}`}>
+                  <span
+                    className={`font-bold ${
+                      margen > 0 ? "text-success" : "text-destructive"
+                    }`}
+                  >
                     {margen.toFixed(1)}%
                   </span>
                 </div>
+
               </div>
             )}
 

@@ -151,13 +151,13 @@ const Postres = () => {
 
             <div className="flex items-center justify-between pt-4 border-t border-border">
               <div>
-                <p className="text-xs text-muted-foreground">Precio</p>
+                <p className="text-xs text-muted-foreground">Venta por unidad</p>
                 <p className="text-lg font-bold text-foreground">
                   S/. {dessert.precio_referencia}
                 </p>
               </div>
               <div className="text-right">
-                <p className="text-xs text-muted-foreground">Costo</p>
+                <p className="text-xs text-muted-foreground">Costo total</p>
                 <p className="text-sm font-medium text-muted-foreground">
                   S/. {dessert.costo_total.toFixed(2)}
                 </p>

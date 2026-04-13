@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 
 interface AuthContextType {
+  // user: any,
   isAuthenticated: boolean;
   loading: boolean;
   login: (token: string) => void;

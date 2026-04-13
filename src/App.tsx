@@ -15,6 +15,10 @@ import Preparaciones from "./pages/Preparaciones";
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import { AuthProvider } from "./context/AuthContext";
+import ResetPassword from "./pages/ResetPassword";
+import ForgotPassword from "./pages/ForgotPassword";
+import VerifyEmail from "./pages/VerifyEmail";
+import VerifyPending from "./pages/VerifyPending";
 
 
 const queryClient = new QueryClient();
@@ -27,10 +31,14 @@ const App = () => (
       <BrowserRouter>
         <AuthProvider>
           <Routes>
-            {/** Rutas protegidas */}
+            {/** Rutas sin proteger */}
             <Route path="/" element={<Index />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            <Route path="/verify-email" element={<VerifyEmail />} />
+            <Route path="/verify-pending" element={<VerifyPending />} />            
 
             {/** Rutas protegidas */}
             <Route path="/dashboard" element={ <ProtectedRoute><Dashboard /></ProtectedRoute>} />

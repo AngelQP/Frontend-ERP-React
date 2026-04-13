@@ -5,10 +5,12 @@ import { Label } from "@/components/ui/label";
 import { Check, User, Lock, ArrowRight, ArrowLeft, Cake } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
 
-import { apiPublic } from "@/lib/axios";
+// import { apiPublic } from "@/lib/axios";
 import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import type { ApiErrorResponse } from "@/features/auth/types/api.error";
+
+import { registerUser } from "@/api/auth.api";
 
 interface FormData {
   firstName: string;
@@ -95,14 +97,11 @@ const Register = () => {
         phone: formData.phone,
       };
 
-      // Ver data del Form
-      // console.log("PAYLOAD REGISTER", payload);
+      await registerUser(payload);
 
-      await apiPublic.post("/auth/register", payload);
+      toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
 
-      toast.success("Usuario registrado correctamente 🎉");
-
-      navigate("/dashboard");
+      navigate("/");
 
     } catch (error) {
 
