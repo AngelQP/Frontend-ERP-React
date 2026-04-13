@@ -1,10 +1,10 @@
-import type { Preparacion, PreparacionApiResponse } from "../types/preparacion.type";
+import type { Preparacion } from "../types/preparacion.type";
 
 /* ============================
    ADAPT FROM API
 ============================ */
 export const adaptPreparacionFromApi = (
-  api: PreparacionApiResponse
+  api: Preparacion
 ): Preparacion => {
   return api
 };

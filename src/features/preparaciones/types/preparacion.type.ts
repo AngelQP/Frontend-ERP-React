@@ -70,6 +70,6 @@ export interface CreatePreparacionRequest {
    ESTADOS
 ============================ */
 export interface EstadoPreparacionApi {
-  value: "ACTIVA" | "FINALIZADA" | "ANULADA";
+  value: "ACTIVA" | "FINALIZADA" | "ANULADA" | "EN VENTA";
   label: string;
 }
