@@ -8,6 +8,8 @@ import { Link } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 
+import { requestPasswordReset } from "@/api/auth.api";
+
 const ForgotPassword = () => {
 
   const { toast } = useToast();
@@ -43,10 +45,7 @@ const ForgotPassword = () => {
 
       setIsLoading(true);
 
-      console.log("Enviar código a:", email);
-
-      // aquí luego irá la API
-      // await forgotPassword(email)
+      await requestPasswordReset(email);
 
         toast({
             title: "Código enviado",

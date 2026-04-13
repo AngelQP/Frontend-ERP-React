@@ -107,9 +107,13 @@ const Register = () => {
 
       const err = error as AxiosError<ApiErrorResponse>;
 
-      const backendMessage =
-      err.response?.data?.message?.message ||
-      "Error al registrar usuario"
+      console.log(err);
+
+      const rawMessage = err.response?.data?.message;
+
+      console.log(rawMessage)
+
+      const backendMessage = getErrorMessage(err.response?.data?.message);
 
       toast.error(backendMessage)
 
@@ -118,6 +122,29 @@ const Register = () => {
     }
 
   };
+
+  function getErrorMessage(message: unknown): string {
+    if (!message) return "Error al registrar usuario";
+
+    // string
+    if (typeof message === "string") {
+      return message;
+    }
+
+    // array de strings
+    if (Array.isArray(message)) {
+      return message.join(", ");
+    }
+
+    // objeto { title, message }
+    if (typeof message === "object") {
+      const msgObj = message as { title?: string; message?: string };
+
+    return msgObj.message || msgObj.title || "Error al registrar usuario";
+  }
+
+  return "Error al registrar usuario";
+}
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

@@ -7,6 +7,9 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { useToast } from "@/components/ui/use-toast";
 
+import { resetPassword } from "@/api/auth.api";
+import type { AxiosError } from "axios";
+
 const ResetPassword = () => {
 
   const { toast } = useToast();
@@ -75,11 +78,10 @@ const ResetPassword = () => {
 
       setIsLoading(true);
 
-      console.log("Token:", token);
-      console.log("Nueva contraseña:", password);
-
-      // aquí irá la API
-      // await resetPassword({ token, password })
+      await resetPassword({
+        token: token!, // aseguramos que no sea undefined
+        password,
+      });
 
       toast({
         title: "Contraseña actualizada",
@@ -89,17 +91,37 @@ const ResetPassword = () => {
 
       setTimeout(() => {
         navigate("/login");
-      }, 2000);
+      }, 1500);
 
-    } catch (error) {
+    } catch (error) {      
+
+      const err = error as AxiosError<any>;
+
+      const backendMessage =
+      err.response?.data?.message;
+
+      const message = Array.isArray(backendMessage)
+        ? backendMessage[0]
+        : backendMessage || "Error al cambiar contraseña";
+
+      if (message?.toLowerCase().includes("expir")) {
+        toast({
+          title: "Link expirado",
+          description: "Solicita un nuevo enlace",
+          variant: "destructive",
+        });
+
+        navigate("/login");
+        return;
+      }
 
       toast({
         title: "Error",
-        description: "El enlace ya no es válido o expiró",
+        description: message,
         variant: "destructive",
       });
 
-      navigate("/login");
+      // navigate("/login");
 
     } finally {
       setIsLoading(false);

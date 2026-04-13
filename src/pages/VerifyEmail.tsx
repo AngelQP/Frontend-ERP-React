@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Cake, CheckCircle2, XCircle, Loader2 } from "lucide-react";
@@ -10,13 +10,12 @@ type Status = "loading" | "success" | "error";
 
 const VerifyEmail = () => {
 
-  const [searchParams] = useSearchParams();
+  const { token } = useParams();
   const navigate = useNavigate();
 
   const [status, setStatus] = useState<Status>("loading");
 
   useEffect(() => {
-    const token = searchParams.get("token");
 
     if (!token) {
       setStatus("error");
@@ -45,7 +44,7 @@ const VerifyEmail = () => {
     };
 
     verify();
-  }, []);
+  }, [token, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">

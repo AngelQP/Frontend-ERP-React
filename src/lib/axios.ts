@@ -9,7 +9,7 @@ export const apiPublic = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 5000,
+  timeout: 20000,
 });
 
 // Instancia de rutas privadas con interceptor para agregar token
@@ -18,7 +18,7 @@ export const apiPrivate = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
-  timeout: 5000,
+  timeout: 20000,
 });
 
 apiPrivate.interceptors.request.use(

@@ -26,3 +26,15 @@ export const resendVerification = async (email: string) => {
   });
   return data;
 };
+
+export const requestPasswordReset = async (email: string): Promise<{ message: string }> => {
+  const { data } = await apiPublic.post("/auth/request-password-reset", {
+    email,
+  });
+  return data;
+};
+
+export const resetPassword = async (payload: { token: string; password: string }) => {
+  const { data } = await apiPublic.post("/auth/reset-password", payload);
+  return data;
+};
