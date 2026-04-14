@@ -44,6 +44,7 @@ const Register = () => {
   /** Verificacion de email */
 
   const sendVerificationEmail = async (email: string) => {
+    console.log("Enviando correo de verificación a:", email);
     const verificationLink = `https://tu-frontend.com/verify`;
 
     try {
@@ -121,14 +122,16 @@ const Register = () => {
         phone: formData.phone,
       };
 
-      await registerUser(payload);
+      // await registerUser(payload);
 
       toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
 
       // 👇 ENVÍAS EL EMAIL
       await sendVerificationEmail(formData.email);
 
-      navigate("/");
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
 
     } catch (error) {
 
@@ -363,6 +366,9 @@ const Register = () => {
             className="text-primary font-medium hover:underline transition-colors"
           >
             Inicia sesión
+          </button>
+          <button onClick={() => sendVerificationEmail("TU_CORREO@gmail.com")}>
+            Probar Email
           </button>
         </p>
       </div>
