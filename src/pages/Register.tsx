@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import type { ApiErrorResponse } from "@/features/auth/types/api.error";
 
-import { registerUser } from "@/api/auth.api";
+// import { registerUser } from "@/api/auth.api";
 
 // Correo importacion
 
@@ -123,6 +123,8 @@ const Register = () => {
       };
 
       // await registerUser(payload);
+
+      console.log(payload);
 
       toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
 
