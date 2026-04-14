@@ -12,6 +12,10 @@ import type { ApiErrorResponse } from "@/features/auth/types/api.error";
 
 import { registerUser } from "@/api/auth.api";
 
+// Correo importacion
+
+import emailjs from '@emailjs/browser';
+
 interface FormData {
   firstName: string;
   lastName: string;
@@ -36,6 +40,26 @@ const Register = () => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<Partial<FormData>>({});
+
+  /** Verificacion de email */
+
+  const sendVerificationEmail = async (email: string) => {
+    const verificationLink = `https://tu-frontend.com/verify`;
+
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE,
+        import.meta.env.VITE_EMAILJS_TEMPLATE,
+        {
+          to_email: email,
+          verification_link: verificationLink,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+    } catch (error) {
+      console.error('Error enviando correo:', error);
+    }
+  };
 
   const updateFormData = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -100,6 +124,9 @@ const Register = () => {
       await registerUser(payload);
 
       toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
+
+      // 👇 ENVÍAS EL EMAIL
+      await sendVerificationEmail(formData.email);
 
       navigate("/");
 
