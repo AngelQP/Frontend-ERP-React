@@ -45,6 +45,7 @@ const Register = () => {
 
   const sendVerificationEmail = async (email: string) => {
     console.log("Enviando correo de verificación a:", email);
+    const newEmail = 'angelquispe_2997@outlook.com'
     const verificationLink = `https://tu-frontend.com/verify`;
 
     try {
@@ -52,7 +53,8 @@ const Register = () => {
         import.meta.env.VITE_EMAILJS_SERVICE,
         import.meta.env.VITE_EMAILJS_TEMPLATE,
         {
-          to_email: email,
+          // to_email: email,
+          to_email: newEmail,
           verification_link: verificationLink,
         },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
