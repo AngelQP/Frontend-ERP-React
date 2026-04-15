@@ -7,6 +7,9 @@ import { Cake, Mail} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { resendVerification } from "@/api/auth.api";
 
+// Import de emailjs
+import emailjs from "@emailjs/browser";
+
 const VerifyPending = () => {
 
   const location = useLocation();
@@ -16,20 +19,67 @@ const VerifyPending = () => {
 
   const [loading, setLoading] = useState(false);
 
+  const sendVerificationEmail = async (
+    email: string,
+    verificationUrl: string,
+    expirationTime: number
+  ) => {
+    try {
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_VERIFY,
+        {
+          to_email: email,
+          verification_url: verificationUrl,
+          expiration_time: expirationTime,
+          year: new Date().getFullYear(),
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  };
+
   const handleResend = async () => {
+
     if (!email) {
       toast.error("No se encontró el correo");
       return;
     }
 
+    if (loading) return;
+
+
     try {
       setLoading(true);
 
-      console.log("EMAIL:", email);
+      const { verificationUrl, expirationTime } = await resendVerification(email);
 
-      await resendVerification(email);
+      if (!verificationUrl) {
+        toast.error("No se pudo generar el enlace");
+        return;
+      }
 
-      toast.success("Correo reenviado 📩");
+      const sent = await sendVerificationEmail(
+        email,
+        verificationUrl,
+        expirationTime
+      );
+
+      if (sent) {
+        toast.success("Correo reenviado 📩");
+
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+
+      } else {
+        toast.error("No se pudo enviar el correo");
+      }
 
     } catch (error: any) {
 
@@ -65,7 +115,7 @@ const VerifyPending = () => {
           </h2>
 
           <p className="text-sm text-muted-foreground mb-6">
-            Te enviamos un enlace de verificación.
+            Te enviamos un enlace de verificación a <strong>{email}</strong>
             <br />
             Si no lo recibiste, puedes reenviarlo.
           </p>

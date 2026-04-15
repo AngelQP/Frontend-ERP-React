@@ -14,13 +14,19 @@ const VerifyEmail = () => {
   const navigate = useNavigate();
 
   const [status, setStatus] = useState<Status>("loading");
+  const [hasVerified, setHasVerified] = useState(false);
 
   useEffect(() => {
 
     if (!token) {
       setStatus("error");
+      toast.error("Token inválido");
       return;
     }
+
+    if (hasVerified) return;
+
+    setHasVerified(true);
 
     const verify = async () => {
       try {
@@ -29,7 +35,7 @@ const VerifyEmail = () => {
         setStatus("success");
         toast.success("Correo verificado correctamente 🎉");
 
-        setTimeout(() => navigate("/login"), 2000);
+        setTimeout(() => navigate("/login"), 3000);
 
       } catch (error: any) {
         setStatus("error");
@@ -44,7 +50,7 @@ const VerifyEmail = () => {
     };
 
     verify();
-  }, [token, navigate]);
+  }, [token, navigate, hasVerified]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -121,6 +127,20 @@ const VerifyEmail = () => {
               Ir al login
             </Button>
           )}
+
+          {/* Cuando hay error que haya reintento */}
+          {status === "error" && (
+          <Button
+            variant="outline"
+            className="w-full mt-3"
+            onClick={() => {
+              setStatus("loading");
+              setHasVerified(false);
+            }}
+          >
+            Reintentar
+          </Button>
+        )}
 
         </div>
 

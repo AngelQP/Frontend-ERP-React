@@ -1,6 +1,6 @@
 
 import { apiPublic } from "@/lib/axios";
-import type { RegisterRequest, RegisterResponse } from "@/features/auth/types/register.type";
+import type { RegisterRequest, RegisterResponse, ResetPasswordResponse } from "@/features/auth/types/register.type";
 import type { LoginRequest, LoginResponse } from "@/features/auth/types/login.type";
 
 export const registerUser = async (payload: RegisterRequest ): Promise<RegisterResponse> => {
@@ -27,7 +27,7 @@ export const resendVerification = async (email: string) => {
   return data;
 };
 
-export const requestPasswordReset = async (email: string): Promise<{ message: string }> => {
+export const requestPasswordReset = async (email: string): Promise<ResetPasswordResponse> => {
   const { data } = await apiPublic.post("/auth/request-password-reset", {
     email,
   });

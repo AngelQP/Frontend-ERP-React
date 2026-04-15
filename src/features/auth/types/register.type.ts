@@ -1,6 +1,5 @@
 
 export interface RegisterRequest {
-
     email: string;
     password: string;
     name: string;
@@ -8,11 +7,14 @@ export interface RegisterRequest {
     phone: string;
 }
 
-export interface RegisterResponse { 
-    id: string;
-    email: string;
-    name: string;
-    lastName: string;
-    token: string;
-}
+export interface RegisterResponse {
+  verificationUrl: string;
+  expirationTime: number;
+  message: string;
+};
 
+export interface ResetPasswordResponse {
+  resetUrl: string | null;
+  expirationTime: number;
+  message: string;
+};

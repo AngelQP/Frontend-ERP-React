@@ -104,7 +104,7 @@ const ResetPassword = () => {
         ? backendMessage[0]
         : backendMessage || "Error al cambiar contraseña";
 
-      if (message?.toLowerCase().includes("expir")) {
+      if (err.response?.data?.title === "TOKEN_EXPIRED") {
         toast({
           title: "Link expirado",
           description: "Solicita un nuevo enlace",

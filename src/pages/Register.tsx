@@ -10,10 +10,9 @@ import { toast } from "sonner";
 import type { AxiosError } from "axios";
 import type { ApiErrorResponse } from "@/features/auth/types/api.error";
 
-// import { registerUser } from "@/api/auth.api";
+import { registerUser } from "@/api/auth.api";
 
 // Correo importacion
-
 import emailjs from '@emailjs/browser';
 
 interface FormData {
@@ -43,24 +42,32 @@ const Register = () => {
 
   /** Verificacion de email */
 
-  const sendVerificationEmail = async (email: string) => {
+  const sendVerificationEmail = async (email: string, expirationTime: number, verificationUrl: string) => {
+    
     console.log("Enviando correo de verificación a:", email);
-    const newEmail = 'angelquispe_2997@outlook.com'
-    const verificationLink = `https://tu-frontend.com/verify`;
+
+    if (!email || !verificationUrl) {
+      console.error("Faltan datos para enviar el correo");
+      return false;
+    }
 
     try {
       await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE,
-        import.meta.env.VITE_EMAILJS_TEMPLATE,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_VERIFY,
         {
-          // to_email: email,
-          to_email: newEmail,
-          verification_link: verificationLink,
+          to_email: email,
+          verification_url: verificationUrl,
+          expiration_time: expirationTime,
+          year: new Date().getFullYear(),
         },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
+
+      return true;
     } catch (error) {
       console.error('Error enviando correo:', error);
+      return false;
     }
   };
 
@@ -124,14 +131,20 @@ const Register = () => {
         phone: formData.phone,
       };
 
-      // await registerUser(payload);
+      const {expirationTime, verificationUrl} = await registerUser(payload);
 
-      console.log(payload);
+      // console.log(payload);
 
       toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
 
       // 👇 ENVÍAS EL EMAIL
-      await sendVerificationEmail(formData.email);
+      const flagEnvio = await sendVerificationEmail(formData.email, expirationTime, verificationUrl);
+
+      if(flagEnvio) {
+        toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
+      } else {
+        toast.error("Error al enviar correo de verificación ❌");
+      }
 
       setTimeout(() => {
         navigate("/");
@@ -370,9 +383,6 @@ const Register = () => {
             className="text-primary font-medium hover:underline transition-colors"
           >
             Inicia sesión
-          </button>
-          <button onClick={() => sendVerificationEmail("TU_CORREO@gmail.com")}>
-            Probar Email
           </button>
         </p>
       </div>
