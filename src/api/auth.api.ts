@@ -6,8 +6,6 @@ import type { LoginRequest, LoginResponse } from "@/features/auth/types/login.ty
 export const registerUser = async (payload: RegisterRequest ): Promise<RegisterResponse> => {
 
     const {data}  = await apiPublic.post<RegisterResponse>("/auth/register", payload);
-
-    console.log(data);
     return data;
 }
 
