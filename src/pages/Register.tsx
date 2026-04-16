@@ -45,6 +45,9 @@ const Register = () => {
   const sendVerificationEmail = async (email: string, expirationTime: number, verificationUrl: string) => {
     
     console.log("Enviando correo de verificación a:", email);
+    console.log("URL de verificación:", verificationUrl);
+    console.log("Tiempo de expiración:", expirationTime);
+
 
     if (!email || !verificationUrl) {
       console.error("Faltan datos para enviar el correo");
