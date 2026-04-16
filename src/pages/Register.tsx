@@ -13,7 +13,7 @@ import type { ApiErrorResponse } from "@/features/auth/types/api.error";
 import { registerUser } from "@/api/auth.api";
 
 // Correo importacion
-import emailjs from '@emailjs/browser';
+// import emailjs from '@emailjs/browser';
 
 interface FormData {
   firstName: string;
