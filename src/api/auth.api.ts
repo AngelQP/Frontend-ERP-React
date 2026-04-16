@@ -4,8 +4,12 @@ import type { RegisterRequest, RegisterResponse, ResetPasswordResponse } from "@
 import type { LoginRequest, LoginResponse } from "@/features/auth/types/login.type";
 
 export const registerUser = async (payload: RegisterRequest ): Promise<RegisterResponse> => {
-    const { data } = await apiPublic.post<RegisterResponse>("/auth/register", payload);
-    console.log(data);
+// export const registerUser = async (payload: RegisterRequest ): Promise<void> => {
+
+    const response  = await apiPublic.post<RegisterResponse>("/auth/register", payload);
+    const {data}  = await apiPublic.post<RegisterResponse>("/auth/register", payload);
+
+    console.log(response);
     return data;
 }
 
