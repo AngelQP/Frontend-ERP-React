@@ -134,16 +134,17 @@ const Register = () => {
         phone: formData.phone,
       };
 
-      const {expirationTime, verificationUrl} = await registerUser(payload);
+      // const {expirationTime, verificationUrl} = await registerUser(payload);
 
-      console.log(expirationTime, verificationUrl);
+      // console.log(expirationTime, verificationUrl);
 
       // console.log(payload);
 
       toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
 
       // 👇 ENVÍAS EL EMAIL
-      const flagEnvio = await sendVerificationEmail(formData.email, expirationTime, verificationUrl);
+      // const flagEnvio = await sendVerificationEmail(formData.email, expirationTime, verificationUrl);
+      const flagEnvio = false;
 
       if(flagEnvio) {
         toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");

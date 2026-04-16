@@ -3,14 +3,14 @@ import { apiPublic } from "@/lib/axios";
 import type { RegisterRequest, RegisterResponse, ResetPasswordResponse } from "@/features/auth/types/register.type";
 import type { LoginRequest, LoginResponse } from "@/features/auth/types/login.type";
 
-export const registerUser = async (payload: RegisterRequest ): Promise<RegisterResponse> => {
-// export const registerUser = async (payload: RegisterRequest ): Promise<void> => {
+// export const registerUser = async (payload: RegisterRequest ): Promise<RegisterResponse> => {
+export const registerUser = async (payload: RegisterRequest ): Promise<void> => {
 
     const response  = await apiPublic.post<RegisterResponse>("/auth/register", payload);
-    const {data}  = await apiPublic.post<RegisterResponse>("/auth/register", payload);
+    // const {data}  = await apiPublic.post<RegisterResponse>("/auth/register", payload);
 
     console.log(response);
-    return data;
+    // return data;
 }
 
 export const loginUser = async (payload: LoginRequest): Promise<LoginResponse> => {
