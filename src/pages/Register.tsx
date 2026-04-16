@@ -133,6 +133,8 @@ const Register = () => {
 
       const {expirationTime, verificationUrl} = await registerUser(payload);
 
+      console.log(expirationTime, verificationUrl);
+
       // console.log(payload);
 
       toast.success("Cuenta creada 🎉 Revisa tu correo para verificarla");
