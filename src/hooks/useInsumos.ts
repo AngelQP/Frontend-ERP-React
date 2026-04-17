@@ -24,22 +24,21 @@ export const useInsumos = () => {
 
   // Manejo de paginacion
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
   const [meta, setMeta] = useState({
     total: 0,
     page: 1,
-    limit: 10,
+    limit: 4,
     totalPages: 1,
     hasNextPage: false,
     hasPrevPage: false,
   });
 
-  const fetchInsumos = useCallback(async (page=1, limit=4) => {
+  const fetchInsumos = useCallback(async (page=1, search?: string) => {
     setLoadingState("loading");
     setError(null);
 
     try {
-      const response = await listarInsumosConStock(page, limit);
+      const response = await listarInsumosConStock(page, 4, search);
       setInsumos(response.data);
       setMeta(response.meta);
       setLoadingState("success");
@@ -69,8 +68,6 @@ export const useInsumos = () => {
   };
 
   useEffect(() => {
-    fetchInsumos();
-
     const fetchUnidadesMedida = async () => {
       try {
         setLoadingUnidades(true);
@@ -113,7 +110,7 @@ export const useInsumos = () => {
       await createInsumoApi(data);
 
       // Agregamos a la lista solo después de que el servidor confirma
-      await fetchInsumos();
+      await fetchInsumos(page);
 
       setLoadingState('success');
       toast.success('Insumo creado correctamente');
@@ -125,7 +122,7 @@ export const useInsumos = () => {
       toast.error(apiError.message || 'Error al crear insumo');
       throw err;
     }
-  }, []);
+  }, [fetchInsumos, page]);
 
   // Editar insumo
   const editarInsumo = useCallback(async (id: string, data: Partial<InsumoFormData>) => {
@@ -158,7 +155,7 @@ export const useInsumos = () => {
     try {
       // await simulateApi();
       await eliminarInsumoApi(id);
-      await fetchInsumos();
+      await fetchInsumos(page);
       setLoadingState('success');
       toast.success('Insumo eliminado correctamente');
     } catch (err) {
@@ -168,7 +165,7 @@ export const useInsumos = () => {
       toast.error(apiError.message || 'Error al eliminar insumo');
       throw err;
     }
-  }, []);
+  }, [fetchInsumos, page]);
 
   // Registrar movimiento de insumo (ingreso/salida/ajuste/merma)
   const registrarMovimiento = useCallback(
@@ -206,7 +203,6 @@ export const useInsumos = () => {
     },
     []
   );
-
 
   // Descontar stock (usado por ventas)
   const descontarStock = useCallback((consumos: { insumo_id: string; cantidad: number }[]) => {
@@ -265,7 +261,6 @@ export const useInsumos = () => {
     // 👇 Paginación
     meta,
     page,
-    limit,
     nextPage,
     prevPage,
     goToPage,

@@ -127,7 +127,7 @@ const OperacionDialog = ({
                       <SelectItem value="INGRESO">Ingreso</SelectItem>
                       <SelectItem value="SALIDA">Salida</SelectItem>
                       <SelectItem value="AJUSTE">Ajuste</SelectItem>
-                      <SelectItem value="MERMA">Merma</SelectItem>
+                      {/* <SelectItem value="MERMA">Merma</SelectItem> */}
                     </SelectContent>
                   </Select>
                   <FormMessage />

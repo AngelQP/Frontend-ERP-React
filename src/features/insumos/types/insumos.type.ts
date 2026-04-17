@@ -16,8 +16,6 @@ export interface InsumoCreateResponse {
 export interface InsumoFormData {
   nombre: string;
   unidad_medida: string;
-  // cantidad_disponible: number;
-  // costo_unitario: number;
 }
 
 export interface InsumoRequestCreate {

@@ -75,7 +75,7 @@ const InsumoDialog = ({
     resolver: zodResolver(insumoSchema),
     defaultValues: {
       nombre: "",
-      unidad_medida: "kg"
+      unidad_medida: ""
     },
   });
 
@@ -90,7 +90,7 @@ const InsumoDialog = ({
       } else {
         form.reset({
           nombre: "",
-          unidad_medida: "kg"
+          unidad_medida: ""
         });
       }
     }

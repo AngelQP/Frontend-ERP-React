@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Plus, Search, Edit2, Trash2, Package, SendToBack } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useInsumos } from "@/hooks/useInsumos";
 import { type InsumoFormData } from "@/features/insumos/types/insumos.type";
 import InsumoDialog from "@/components/insumos/InsumoDialog";
@@ -25,6 +25,9 @@ const Insumos = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [selectedInsumo, setSelectedInsumo] = useState<Insumo | null>(null);
+
+  // debounce
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
   // Estado para el modal de movimeintos de insumos
   const [movementDialogOpen, setMovementDialogOpen] = useState(false);
@@ -48,22 +51,36 @@ const Insumos = () => {
     meta,
     page,
     goToPage,
-    // nextPage,
-    // prevPage,
     fetchInsumos
 
   } = useInsumos();
 
   const isLoading = loadingState === "loading";
 
+  // UseEffect para debounce del search
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+    }, 500); 
+
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  // UseEffect para resetear a página 1 al cambiar el término de búsqueda
+  useEffect(() => {
+    goToPage(1);
+  }, [debouncedSearch]);
+
+  // UseEffect para cargar insumos al montar y al cambiar el término de búsqueda
+  useEffect(() => {
+
+    fetchInsumos(page, debouncedSearch || undefined);
+  }, [page, debouncedSearch]);
+
   // Handler para apertura de movimientos de insumos
   const handleOpenMovement = () => {
     setMovementDialogOpen(true);
   };
-
-  const filteredIngredients = insumos.filter((item) =>
-    item.nombre.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   const handleOpenCreate = () => {
     setSelectedInsumo(null);
@@ -167,7 +184,7 @@ const Insumos = () => {
             </TableRow>
           </TableHeader>
           <TableBody className="">
-            {filteredIngredients.map((item) => (
+            {insumos.map((item) => (
               <TableRow key={item.id} className="hover:bg-muted/30 transition-colors">
                 <TableCell>
                   <div className="flex items-center gap-3">
@@ -227,18 +244,20 @@ const Insumos = () => {
       </div>
 
       {/* Empty State */}
-      {filteredIngredients.length === 0 && (
+      {insumos.length === 0 && (
         <div className="text-center py-12">
           <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
           <h3 className="text-lg font-medium text-foreground mb-2">
-            {searchTerm ? "No se encontraron resultados" : "No hay insumos"}
+            {searchTerm.trim() ? "No se encontraron resultados" : "No hay insumos"}
           </h3>
           <p className="text-muted-foreground mb-4">
-            {searchTerm
+            {searchTerm.trim()
               ? "Intenta con otro término de búsqueda"
               : "Agrega tu primer insumo para comenzar"}
           </p>
-          {!searchTerm && (
+
+          {/* 👇 SOLO mostrar botón si NO estás buscando */}
+          {!searchTerm.trim() && (
             <Button className="gap-2" onClick={handleOpenCreate}>
               <Plus className="w-4 h-4" />
               Nuevo insumo
@@ -257,11 +276,7 @@ const Insumos = () => {
             <Button
               variant="outline"
               disabled={!meta.hasPrevPage}
-              onClick={ () => {
-                const prev = page - 1;
-                goToPage(prev);
-                fetchInsumos(prev);
-              }}
+              onClick={ () => goToPage(page - 1) }
             >
               Anterior
             </Button>
@@ -273,11 +288,7 @@ const Insumos = () => {
             <Button
               variant="outline"
               disabled={!meta.hasNextPage}
-              onClick={() => {
-                const next = page + 1;
-                goToPage(next);
-                fetchInsumos(next);
-              }}
+              onClick={() => goToPage(page + 1)}
             >
               Siguiente
             </Button>

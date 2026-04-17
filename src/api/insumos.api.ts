@@ -4,12 +4,19 @@ import type { Insumo, InsumoCreateResponse, InsumoFormData, InsumosPaginadosResp
 import type { UnidadMedida } from "@/features/insumos/types/unidad-medida.types";
 
 export const listarInsumosConStock = async (
-  page: number = 1,
-  limit: number = 4
+  page: number,
+  limit?: number,
+  search?: string
 ): Promise<InsumosPaginadosResponse> => {
 
+  limit = 4; // Se fija el límite a 4 
+
   const { data } = await apiPrivate.get("/inventario-insumos", {
-    params: { page, limit }
+    params: { 
+      page, 
+      limit,
+      ...(search ? { search } : {})
+    }
   });
 
   return {
